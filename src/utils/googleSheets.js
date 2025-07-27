@@ -400,6 +400,23 @@ class GoogleSheetsAPI {
       // Ensure the token is set for the API client
       this.gapi.client.setToken({ access_token: this.accessToken });
       
+      // First, get the spreadsheet to verify sheet structure
+      console.log('Getting spreadsheet info to verify sheets...');
+      const spreadsheetInfo = await this.gapi.client.sheets.spreadsheets.get({
+        spreadsheetId: this.spreadsheetId
+      });
+      
+      const sheets = spreadsheetInfo.result.sheets;
+      console.log('Available sheets:', sheets.map(s => ({ id: s.properties.sheetId, title: s.properties.title })));
+      
+      // Find the correct sheet IDs
+      const profileSheet = sheets.find(s => s.properties.title === 'Influencer Profiles');
+      const dealSheet = sheets.find(s => s.properties.title === 'Deal History');
+      
+      if (!profileSheet || !dealSheet) {
+        throw new Error('Required sheets not found. Expected "Influencer Profiles" and "Deal History" sheets.');
+      }
+      
       // Influencer Profiles headers - User-friendly and comprehensive
       const profileHeaders = [
         'Profile ID', 'Influencer Name', 'Promo Code', 'Email Address', 'Instagram Handle', 
@@ -417,62 +434,93 @@ class GoogleSheetsAPI {
         'Price per 1K Views ($)', 'Advanced Mode Used', 'Custom Weights', 'Notes'
       ];
       
-      const requests = [
-        {
-          updateCells: {
-            range: {
-              sheetId: 0, // Influencer Profiles sheet
-              startRowIndex: 0,
-              endRowIndex: 1,
-              startColumnIndex: 0,
-              endColumnIndex: profileHeaders.length
-            },
-            rows: [{
-              values: profileHeaders.map(header => ({
-                userEnteredValue: { stringValue: header },
-                userEnteredFormat: {
-                  textFormat: { bold: true },
-                  backgroundColor: { red: 0.9, green: 0.9, blue: 0.9 }
-                }
-              }))
-            }],
-            fields: 'userEnteredValue,userEnteredFormat'
-          }
-        },
-        {
-          updateCells: {
-            range: {
-              sheetId: 1, // Deal History sheet
-              startRowIndex: 0,
-              endRowIndex: 1,
-              startColumnIndex: 0,
-              endColumnIndex: dealHeaders.length
-            },
-            rows: [{
-              values: dealHeaders.map(header => ({
-                userEnteredValue: { stringValue: header },
-                userEnteredFormat: {
-                  textFormat: { bold: true },
-                  backgroundColor: { red: 0.9, green: 0.9, blue: 0.9 }
-                }
-              }))
-            }],
-            fields: 'userEnteredValue,userEnteredFormat'
-          }
-        }
-      ];
+      console.log('Setting up headers for Profile Sheet ID:', profileSheet.properties.sheetId);
+      console.log('Setting up headers for Deal Sheet ID:', dealSheet.properties.sheetId);
       
-      console.log('Setting up headers with requests:', requests);
-      const response = await this.gapi.client.sheets.spreadsheets.batchUpdate({
+      // Set up headers using simple values.update instead of batchUpdate for better compatibility
+      console.log('Setting Influencer Profiles headers...');
+      await this.gapi.client.sheets.spreadsheets.values.update({
         spreadsheetId: this.spreadsheetId,
-        requests: requests
+        range: 'Influencer Profiles!A1:J1',
+        valueInputOption: 'USER_ENTERED',
+        values: [profileHeaders]
       });
       
-      console.log('✅ Headers set up successfully', response);
+      console.log('Setting Deal History headers...');
+      await this.gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId: this.spreadsheetId,
+        range: 'Deal History!A1:AB1',
+        valueInputOption: 'USER_ENTERED',
+        values: [dealHeaders]
+      });
+      
+      // Format headers as bold (optional, but nice to have)
+      try {
+        console.log('Formatting headers as bold...');
+        const formatRequests = [
+          {
+            repeatCell: {
+              range: {
+                sheetId: profileSheet.properties.sheetId,
+                startRowIndex: 0,
+                endRowIndex: 1,
+                startColumnIndex: 0,
+                endColumnIndex: profileHeaders.length
+              },
+              cell: {
+                userEnteredFormat: {
+                  textFormat: { bold: true },
+                  backgroundColor: { red: 0.9, green: 0.9, blue: 0.9 }
+                }
+              },
+              fields: 'userEnteredFormat(textFormat,backgroundColor)'
+            }
+          },
+          {
+            repeatCell: {
+              range: {
+                sheetId: dealSheet.properties.sheetId,
+                startRowIndex: 0,
+                endRowIndex: 1,
+                startColumnIndex: 0,
+                endColumnIndex: dealHeaders.length
+              },
+              cell: {
+                userEnteredFormat: {
+                  textFormat: { bold: true },
+                  backgroundColor: { red: 0.9, green: 0.9, blue: 0.9 }
+                }
+              },
+              fields: 'userEnteredFormat(textFormat,backgroundColor)'
+            }
+          }
+        ];
+        
+        await this.gapi.client.sheets.spreadsheets.batchUpdate({
+          spreadsheetId: this.spreadsheetId,
+          requests: formatRequests
+        });
+        
+        console.log('✅ Headers formatted successfully');
+      } catch (formatError) {
+        console.warn('⚠️ Header formatting failed, but headers were set:', formatError);
+        // Don't throw here, formatting is optional
+      }
+      
+      console.log('✅ Headers set up successfully');
     } catch (error) {
       console.error('❌ Failed to set up headers:', error);
-      console.error('Error details:', error.result || error);
-      throw new Error(`Failed to set up headers: ${error.message || 'Unknown error'}`);
+      console.error('Error details:', error.result || error.message || error);
+      
+      // Provide more specific error information
+      let errorMessage = 'Unknown error';
+      if (error.result && error.result.error) {
+        errorMessage = error.result.error.message || error.result.error.code || 'API Error';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      throw new Error(`Failed to set up headers: ${errorMessage}`);
     }
   }
 
