@@ -720,7 +720,7 @@ function App() {
                             handlePriceChange(newValue);
                             handlePriceBlur(newValue);
                           }}
-                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-tr-lg transition-colors flex items-center justify-center text-sm font-bold"
+                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-tr-lg transition-colors flex items-center justify-center text-sm font-bold leading-none"
                         >
                           +
                         </button>
@@ -735,7 +735,7 @@ function App() {
                             handlePriceChange(newValue);
                             handlePriceBlur(newValue);
                           }}
-                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-br-lg transition-colors flex items-center justify-center text-sm font-bold"
+                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-br-lg transition-colors flex items-center justify-center text-sm font-bold leading-none"
                         >
                           −
                         </button>
@@ -769,7 +769,7 @@ function App() {
                             handleViewsChange(newValue);
                             handleViewsBlur(newValue);
                           }}
-                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-tr-lg transition-colors flex items-center justify-center text-sm font-bold"
+                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-tr-lg transition-colors flex items-center justify-center text-sm font-bold leading-none"
                         >
                           +
                         </button>
@@ -784,7 +784,7 @@ function App() {
                             handleViewsChange(newValue);
                             handleViewsBlur(newValue);
                           }}
-                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-br-lg transition-colors flex items-center justify-center text-sm font-bold"
+                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-br-lg transition-colors flex items-center justify-center text-sm font-bold leading-none"
                         >
                           −
                         </button>
@@ -827,7 +827,7 @@ function App() {
                             handleVideoCountChange(newValue.toString());
                             handleVideoCountBlur(newValue.toString());
                           }}
-                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-tr-lg transition-colors flex items-center justify-center text-sm font-bold"
+                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-tr-lg transition-colors flex items-center justify-center text-sm font-bold leading-none"
                         >
                           +
                         </button>
@@ -839,7 +839,7 @@ function App() {
                             handleVideoCountChange(newValue.toString());
                             handleVideoCountBlur(newValue.toString());
                           }}
-                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-br-lg transition-colors flex items-center justify-center text-sm font-bold"
+                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-br-lg transition-colors flex items-center justify-center text-sm font-bold leading-none"
                         >
                           −
                         </button>
@@ -872,7 +872,7 @@ function App() {
                             handleStoryCountChange(newValue.toString());
                             handleStoryCountBlur(newValue.toString());
                           }}
-                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-tr-lg transition-colors flex items-center justify-center text-sm font-bold"
+                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-tr-lg transition-colors flex items-center justify-center text-sm font-bold leading-none"
                         >
                           +
                         </button>
@@ -884,7 +884,7 @@ function App() {
                             handleStoryCountChange(newValue.toString());
                             handleStoryCountBlur(newValue.toString());
                           }}
-                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-br-lg transition-colors flex items-center justify-center text-sm font-bold"
+                          className="flex-1 px-3 bg-white/10 hover:bg-purple-500/20 text-purple-600 hover:text-purple-700 rounded-br-lg transition-colors flex items-center justify-center text-sm font-bold leading-none"
                         >
                           −
                         </button>
