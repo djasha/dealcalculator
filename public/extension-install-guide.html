@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install Chrome Extension - Influencer Deal Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div class="min-h-screen py-12 px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold mb-4">Install Chrome Extension</h1>
+                <p class="text-xl text-white/80">Follow these simple steps to install the Influencer Deal Calculator extension</p>
+            </div>
+
+            <!-- Quick Install Button -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mb-8 text-center">
+                <h2 class="text-2xl font-bold mb-4">Quick Install</h2>
+                <button 
+                    onclick="quickInstall()" 
+                    class="inline-flex items-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    One-Click Install
+                </button>
+                <p class="text-white/70 mt-3">This will download the extension and open Chrome's extensions page</p>
+            </div>
+
+            <!-- Step-by-step Instructions -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8">
+                <h2 class="text-2xl font-bold mb-6">Step-by-Step Installation</h2>
+                
+                <div class="space-y-6">
+                    <!-- Step 1 -->
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Download the Extension</h3>
+                            <p class="text-white/80 mb-3">Click the download button to get the extension ZIP file</p>
+                            <a 
+                                href="/influencer-deal-calculator-extension.zip" 
+                                download="influencer-deal-calculator-extension.zip"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200"
+                            >
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                </svg>
+                                Download Extension
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Extract the ZIP File</h3>
+                            <p class="text-white/80">Right-click the downloaded ZIP file and select "Extract All" or use your preferred extraction tool</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Open Chrome Extensions</h3>
+                            <p class="text-white/80 mb-3">Go to Chrome's extensions page by typing in the address bar:</p>
+                            <div class="bg-black/30 rounded-lg p-3 font-mono text-green-300">
+                                chrome://extensions/
+                            </div>
+                            <p class="text-white/60 text-sm mt-2">Or click the button below to open it automatically:</p>
+                            <button 
+                                onclick="openExtensionsPage()" 
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-all duration-200 mt-2"
+                            >
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                </svg>
+                                Open Extensions Page
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Enable Developer Mode</h3>
+                            <p class="text-white/80">Toggle the "Developer mode" switch in the top-right corner of the extensions page</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">5</div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Load Unpacked Extension</h3>
+                            <p class="text-white/80">Click "Load unpacked" and select the extracted folder containing the extension files</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div class="flex gap-4">
+                        <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center font-bold flex-shrink-0">✓</div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2">Done!</h3>
+                            <p class="text-white/80">The extension is now installed. Look for the calculator icon in Chrome's side panel or extensions menu.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 mt-8">
+                <h2 class="text-2xl font-bold mb-6">Extension Features</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Side Panel Integration</h3>
+                            <p class="text-white/70 text-sm">Works in Chrome's native side panel</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Offline Functionality</h3>
+                            <p class="text-white/70 text-sm">Works without internet connection</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Google Sheets Sync</h3>
+                            <p class="text-white/70 text-sm">Automatic data synchronization</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold">Full Calculator Features</h3>
+                            <p class="text-white/70 text-sm">Same functionality as web app</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to App -->
+            <div class="text-center mt-8">
+                <a 
+                    href="/" 
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all duration-200"
+                >
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                    Back to Calculator
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function quickInstall() {
+            // Download the extension
+            const link = document.createElement('a');
+            link.href = '/influencer-deal-calculator-extension.zip';
+            link.download = 'influencer-deal-calculator-extension.zip';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Wait a moment then open extensions page
+            setTimeout(() => {
+                openExtensionsPage();
+                
+                // Show success message
+                alert('Extension downloaded! Follow the instructions on the extensions page to complete installation.');
+            }, 1000);
+        }
+        
+        function openExtensionsPage() {
+            window.open('chrome://extensions/', '_blank');
+        }
+    </script>
+</body>
+</html>
