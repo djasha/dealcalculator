@@ -10,6 +10,6 @@
   to = "/index.html"
   status = 200
 
-[context.production.environment]
-  VITE_GOOGLE_CLIENT_ID = "1054820287344-62h9gcetsrjml598881ukm9fnug9jtdm.apps.googleusercontent.com"
-  VITE_GOOGLE_API_KEY = "AIzaSyDwOsJL2Nwdy4WVsS9JbomFaRKeoFmR648"
+# Environment variables should be set in Netlify dashboard, not here
+# Go to: Site settings > Environment variables
+# Add: VITE_GOOGLE_CLIENT_ID and VITE_GOOGLE_API_KEY
