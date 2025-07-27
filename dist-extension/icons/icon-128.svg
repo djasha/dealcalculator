@@ -1,64 +1,67 @@
-<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="grad128" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Main gradient - matching current logo -->
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
       <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="gold128" x1="0%" y1="0%" x2="100%" y2="100%">
+    
+    <!-- Gold accent -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
     </linearGradient>
-    <radialGradient id="highlight128" cx="50%" cy="30%">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
-      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
-    </radialGradient>
-    <filter id="shadow128" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+    
+    <!-- Soft glow -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.2"/>
     </filter>
   </defs>
   
-  <circle cx="64" cy="64" r="56" fill="url(#grad128)" filter="url(#shadow128)"/>
-  <circle cx="64" cy="64" r="56" fill="url(#highlight128)"/>
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="85" fill="url(#mainGradient)" filter="url(#softGlow)"/>
   
-  <!-- Target -->
-  <g transform="translate(64, 45)">
-    <circle cx="0" cy="0" r="20" fill="none" stroke="white" stroke-width="4" opacity="0.9"/>
-    <circle cx="0" cy="0" r="12" fill="none" stroke="white" stroke-width="3" opacity="0.9"/>
-    <circle cx="0" cy="0" r="6" fill="url(#gold128)"/>
-    <circle cx="-2" cy="-2" r="3" fill="white" opacity="0.4"/>
-  </g>
-  
-  <!-- Calculator -->
-  <g transform="translate(64, 85)">
-    <rect x="-16" y="-8" width="32" height="16" rx="3" fill="white" opacity="0.95" filter="url(#shadow128)"/>
-    <rect x="-13" y="-5" width="26" height="6" rx="1" fill="#1f2937"/>
-    <text x="0" y="1" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="url(#gold128)">$</text>
+  <!-- Unique Calculator Design - Simplified & Iconic -->
+  <g transform="translate(100, 100)">
     
-    <!-- Calculator buttons -->
-    <g fill="#6366f1" opacity="0.8">
-      <!-- Top row -->
-      <rect x="-10" y="4" width="3" height="2.5" rx="0.3"/>
-      <rect x="-5" y="4" width="3" height="2.5" rx="0.3"/>
-      <rect x="0" y="4" width="3" height="2.5" rx="0.3"/>
-      <rect x="5" y="4" width="3" height="2.5" rx="0.3"/>
-      
-      <!-- Bottom row -->
-      <rect x="-10" y="8" width="3" height="2.5" rx="0.3"/>
-      <rect x="-5" y="8" width="3" height="2.5" rx="0.3"/>
-      <rect x="0" y="8" width="3" height="2.5" rx="0.3"/>
-      <rect x="5" y="8" width="3" height="2.5" rx="0.3"/>
+    <!-- Calculator screen - larger and more prominent -->
+    <rect x="-35" y="-40" width="70" height="25" rx="6" fill="white" opacity="0.95"/>
+    <rect x="-32" y="-37" width="64" height="19" rx="3" fill="#1f2937"/>
+    
+    <!-- Dollar symbol on screen - unique touch -->
+    <text x="25" y="-23" text-anchor="end" font-family="Arial" font-size="16" font-weight="bold" fill="url(#goldGradient)">$</text>
+    
+    <!-- Simplified button grid - unique minimal design -->
+    <g fill="white" opacity="0.9">
+      <!-- Just 4 key buttons in a unique diamond/cross pattern -->
+      <circle cx="0" cy="-5" r="8"/>  <!-- Top -->
+      <circle cx="-15" cy="10" r="8"/> <!-- Left -->
+      <circle cx="15" cy="10" r="8"/>  <!-- Right -->
+      <circle cx="0" cy="25" r="8"/>   <!-- Bottom -->
     </g>
+    
+    <!-- Button symbols - minimal and clean -->
+    <g fill="#7c3aed" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle">
+      <text x="0" y="0">+</text>    <!-- Top -->
+      <text x="-15" y="15">-</text>  <!-- Left -->
+      <text x="15" y="15">×</text>   <!-- Right -->
+      <text x="0" y="30">=</text>    <!-- Bottom -->
+    </g>
+    
+    <!-- Unique accent - small dots for visual interest -->
+    <g fill="url(#goldGradient)" opacity="0.7">
+      <circle cx="-25" cy="-10" r="2"/>
+      <circle cx="25" cy="-10" r="2"/>
+      <circle cx="-25" cy="35" r="2"/>
+      <circle cx="25" cy="35" r="2"/>
+    </g>
+    
   </g>
   
-  <!-- Decorative elements -->
-  <g opacity="0.6">
-    <circle cx="25" cy="35" r="2" fill="white"/>
-    <circle cx="20" cy="50" r="1.5" fill="white" opacity="0.7"/>
-    <circle cx="30" cy="65" r="2" fill="white" opacity="0.8"/>
-    
-    <circle cx="103" cy="35" r="2" fill="white"/>
-    <circle cx="108" cy="50" r="1.5" fill="white" opacity="0.7"/>
-    <circle cx="98" cy="65" r="2" fill="white" opacity="0.8"/>
+  <!-- Minimal sparkle for premium feel -->
+  <g fill="white" opacity="0.4">
+    <polygon points="50,50 52,55 57,55 53,58 55,63 50,60 45,63 47,58 43,55 48,55" transform="scale(0.4)"/>
+    <polygon points="150,140 152,145 157,145 153,148 155,153 150,150 145,153 147,148 143,145 148,145" transform="scale(0.3)"/>
   </g>
 </svg>

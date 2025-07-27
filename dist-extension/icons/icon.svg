@@ -1,29 +1,67 @@
-<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Main gradient - matching current logo -->
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
     </linearGradient>
+    
+    <!-- Gold accent -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Soft glow -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
   </defs>
   
   <!-- Background circle -->
-  <circle cx="64" cy="64" r="60" fill="url(#gradient)" stroke="#4f46e5" stroke-width="2"/>
+  <circle cx="100" cy="100" r="85" fill="url(#mainGradient)" filter="url(#softGlow)"/>
   
-  <!-- Target symbol (🎯 replacement) -->
-  <circle cx="64" cy="64" r="45" fill="none" stroke="white" stroke-width="3"/>
-  <circle cx="64" cy="64" r="30" fill="none" stroke="white" stroke-width="2"/>
-  <circle cx="64" cy="64" r="15" fill="white"/>
-  <circle cx="64" cy="64" r="8" fill="#6366f1"/>
+  <!-- Unique Calculator Design - Simplified & Iconic -->
+  <g transform="translate(100, 100)">
+    
+    <!-- Calculator screen - larger and more prominent -->
+    <rect x="-35" y="-40" width="70" height="25" rx="6" fill="white" opacity="0.95"/>
+    <rect x="-32" y="-37" width="64" height="19" rx="3" fill="#1f2937"/>
+    
+    <!-- Dollar symbol on screen - unique touch -->
+    <text x="25" y="-23" text-anchor="end" font-family="Arial" font-size="16" font-weight="bold" fill="url(#goldGradient)">$</text>
+    
+    <!-- Simplified button grid - unique minimal design -->
+    <g fill="white" opacity="0.9">
+      <!-- Just 4 key buttons in a unique diamond/cross pattern -->
+      <circle cx="0" cy="-5" r="8"/>  <!-- Top -->
+      <circle cx="-15" cy="10" r="8"/> <!-- Left -->
+      <circle cx="15" cy="10" r="8"/>  <!-- Right -->
+      <circle cx="0" cy="25" r="8"/>   <!-- Bottom -->
+    </g>
+    
+    <!-- Button symbols - minimal and clean -->
+    <g fill="#7c3aed" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle">
+      <text x="0" y="0">+</text>    <!-- Top -->
+      <text x="-15" y="15">-</text>  <!-- Left -->
+      <text x="15" y="15">×</text>   <!-- Right -->
+      <text x="0" y="30">=</text>    <!-- Bottom -->
+    </g>
+    
+    <!-- Unique accent - small dots for visual interest -->
+    <g fill="url(#goldGradient)" opacity="0.7">
+      <circle cx="-25" cy="-10" r="2"/>
+      <circle cx="25" cy="-10" r="2"/>
+      <circle cx="-25" cy="35" r="2"/>
+      <circle cx="25" cy="35" r="2"/>
+    </g>
+    
+  </g>
   
-  <!-- Calculator symbol -->
-  <rect x="45" y="85" width="38" height="25" rx="3" fill="white" opacity="0.9"/>
-  <rect x="48" y="88" width="8" height="3" fill="#6366f1"/>
-  <rect x="58" y="88" width="8" height="3" fill="#6366f1"/>
-  <rect x="68" y="88" width="8" height="3" fill="#6366f1"/>
-  <rect x="48" y="93" width="8" height="3" fill="#6366f1"/>
-  <rect x="58" y="93" width="8" height="3" fill="#6366f1"/>
-  <rect x="68" y="93" width="8" height="3" fill="#6366f1"/>
-  <rect x="48" y="98" width="8" height="3" fill="#6366f1"/>
-  <rect x="58" y="98" width="8" height="3" fill="#6366f1"/>
-  <rect x="68" y="98" width="8" height="3" fill="#6366f1"/>
+  <!-- Minimal sparkle for premium feel -->
+  <g fill="white" opacity="0.4">
+    <polygon points="50,50 52,55 57,55 53,58 55,63 50,60 45,63 47,58 43,55 48,55" transform="scale(0.4)"/>
+    <polygon points="150,140 152,145 157,145 153,148 155,153 150,150 145,153 147,148 143,145 148,145" transform="scale(0.3)"/>
+  </g>
 </svg>

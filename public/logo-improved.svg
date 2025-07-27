@@ -1,0 +1,123 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Enhanced main gradient -->
+    <radialGradient id="mainGradient" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5b21b6;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Gold gradient for accent -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- White highlight gradient -->
+    <radialGradient id="whiteGradient" cx="50%" cy="25%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.4" />
+      <stop offset="70%" style="stop-color:#ffffff;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- Enhanced drop shadow -->
+    <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+    
+    <!-- Inner glow effect -->
+    <filter id="innerGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with enhanced gradient -->
+  <circle cx="100" cy="100" r="85" fill="url(#mainGradient)" filter="url(#dropShadow)"/>
+  
+  <!-- Subtle inner ring for depth -->
+  <circle cx="100" cy="100" r="78" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  
+  <!-- Highlight overlay -->
+  <circle cx="100" cy="100" r="85" fill="url(#whiteGradient)"/>
+  
+  <!-- Main Calculator Icon - Centered and Larger -->
+  <g transform="translate(100, 100)">
+    <!-- Calculator body with better proportions -->
+    <rect x="-28" y="-35" width="56" height="70" rx="8" fill="white" opacity="0.95" filter="url(#innerGlow)"/>
+    
+    <!-- Calculator screen -->
+    <rect x="-24" y="-30" width="48" height="16" rx="3" fill="#1f2937"/>
+    
+    <!-- Display text showing "888" -->
+    <text x="20" y="-18" text-anchor="end" font-family="monospace" font-size="12" font-weight="bold" fill="url(#goldGradient)">888</text>
+    
+    <!-- Calculator buttons grid - more realistic -->
+    <g fill="#7c3aed" opacity="0.8">
+      <!-- Row 1 -->
+      <rect x="-20" y="-8" width="8" height="8" rx="2"/>
+      <rect x="-8" y="-8" width="8" height="8" rx="2"/>
+      <rect x="4" y="-8" width="8" height="8" rx="2"/>
+      <rect x="16" y="-8" width="8" height="8" rx="2"/>
+      
+      <!-- Row 2 -->
+      <rect x="-20" y="4" width="8" height="8" rx="2"/>
+      <rect x="-8" y="4" width="8" height="8" rx="2"/>
+      <rect x="4" y="4" width="8" height="8" rx="2"/>
+      <rect x="16" y="4" width="8" height="8" rx="2"/>
+      
+      <!-- Row 3 -->
+      <rect x="-20" y="16" width="8" height="8" rx="2"/>
+      <rect x="-8" y="16" width="8" height="8" rx="2"/>
+      <rect x="4" y="16" width="8" height="8" rx="2"/>
+      <rect x="16" y="16" width="8" height="20" rx="2" fill="url(#goldGradient)"/>
+      
+      <!-- Row 4 -->
+      <rect x="-20" y="28" width="20" height="8" rx="2"/>
+      <rect x="4" y="28" width="8" height="8" rx="2"/>
+    </g>
+    
+    <!-- Button labels for realism -->
+    <g fill="white" font-family="Arial" font-size="5" font-weight="bold" text-anchor="middle">
+      <text x="-16" y="-2">7</text>
+      <text x="-4" y="-2">8</text>
+      <text x="8" y="-2">9</text>
+      <text x="20" y="-2">÷</text>
+      
+      <text x="-16" y="10">4</text>
+      <text x="-4" y="10">5</text>
+      <text x="8" y="10">6</text>
+      <text x="20" y="10">×</text>
+      
+      <text x="-16" y="22">1</text>
+      <text x="-4" y="22">2</text>
+      <text x="8" y="22">3</text>
+      <text x="20" y="30" fill="white">=</text>
+      
+      <text x="-10" y="34">0</text>
+      <text x="8" y="34">.</text>
+    </g>
+  </g>
+  
+  <!-- Subtle social media hint - minimal dots -->
+  <g opacity="0.3">
+    <!-- Left side dots -->
+    <circle cx="35" cy="70" r="2" fill="white"/>
+    <circle cx="30" cy="100" r="1.5" fill="white"/>
+    <circle cx="35" cy="130" r="2" fill="white"/>
+    
+    <!-- Right side dots -->
+    <circle cx="165" cy="70" r="2" fill="white"/>
+    <circle cx="170" cy="100" r="1.5" fill="white"/>
+    <circle cx="165" cy="130" r="2" fill="white"/>
+  </g>
+  
+  <!-- Subtle sparkle effects for premium feel -->
+  <g fill="white" opacity="0.6">
+    <polygon points="60,45 62,50 67,50 63,53 65,58 60,55 55,58 57,53 53,50 58,50" transform="scale(0.3)"/>
+    <polygon points="140,160 142,165 147,165 143,168 145,173 140,170 135,173 137,168 133,165 138,165" transform="scale(0.4)"/>
+  </g>
+</svg>
