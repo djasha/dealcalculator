@@ -1,5 +1,6 @@
 // Google Sheets API Integration
 // Handles authentication, sheet operations, and data synchronization
+/* global chrome */
 
 class GoogleSheetsAPI {
   constructor() {
@@ -10,6 +11,7 @@ class GoogleSheetsAPI {
     this.accessToken = null;
     this.userInfo = null;
     this.spreadsheetId = null;
+    this.tokenExpiryTime = null;
     
     // Configuration
     this.config = {
@@ -18,6 +20,119 @@ class GoogleSheetsAPI {
       discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
       scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file'
     };
+    
+    // Load persisted data on initialization
+    this.loadPersistedData();
+  }
+  
+  // Storage helper methods for Chrome extension and web compatibility
+  async saveToStorage(key, value) {
+    try {
+      // Check if we're in a Chrome extension environment
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        return new Promise((resolve) => {
+          chrome.storage.local.set({ [key]: value }, resolve);
+        });
+      } else {
+        // Fallback to localStorage for web app
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+    } catch (error) {
+      console.warn('Failed to save to storage:', error);
+    }
+  }
+  
+  async getFromStorage(key) {
+    try {
+      // Check if we're in a Chrome extension environment
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        return new Promise((resolve) => {
+          chrome.storage.local.get([key], (result) => {
+            resolve(result[key] || null);
+          });
+        });
+      } else {
+        // Fallback to localStorage for web app
+        const value = localStorage.getItem(key);
+        return value ? JSON.parse(value) : null;
+      }
+    } catch (error) {
+      console.warn('Failed to get from storage:', error);
+      return null;
+    }
+  }
+  
+  async removeFromStorage(key) {
+    try {
+      // Check if we're in a Chrome extension environment
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        return new Promise((resolve) => {
+          chrome.storage.local.remove([key], resolve);
+        });
+      } else {
+        // Fallback to localStorage for web app
+        localStorage.removeItem(key);
+      }
+    } catch (error) {
+      console.warn('Failed to remove from storage:', error);
+    }
+  }
+  
+  // Load persisted authentication data
+  async loadPersistedData() {
+    try {
+      const authData = await this.getFromStorage('googleSheetsAuth');
+      if (authData) {
+        this.accessToken = authData.accessToken;
+        this.userInfo = authData.userInfo;
+        this.spreadsheetId = authData.spreadsheetId;
+        this.tokenExpiryTime = authData.tokenExpiryTime;
+        
+        // Check if token is still valid (tokens typically expire in 1 hour)
+        const now = Date.now();
+        if (this.tokenExpiryTime && now < this.tokenExpiryTime) {
+          this.isAuthenticated = true;
+          console.log('✅ Restored authentication from storage');
+        } else {
+          // Token expired, clear it
+          await this.clearPersistedAuth();
+          console.log('🔄 Stored token expired, cleared authentication');
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load persisted data:', error);
+    }
+  }
+  
+  // Save authentication data persistently
+  async saveAuthData() {
+    try {
+      const authData = {
+        accessToken: this.accessToken,
+        userInfo: this.userInfo,
+        spreadsheetId: this.spreadsheetId,
+        tokenExpiryTime: this.tokenExpiryTime
+      };
+      await this.saveToStorage('googleSheetsAuth', authData);
+      console.log('✅ Authentication data saved persistently');
+    } catch (error) {
+      console.warn('Failed to save auth data:', error);
+    }
+  }
+  
+  // Clear persisted authentication data
+  async clearPersistedAuth() {
+    try {
+      await this.removeFromStorage('googleSheetsAuth');
+      this.accessToken = null;
+      this.userInfo = null;
+      this.spreadsheetId = null;
+      this.tokenExpiryTime = null;
+      this.isAuthenticated = false;
+      console.log('🗑️ Cleared persisted authentication data');
+    } catch (error) {
+      console.warn('Failed to clear auth data:', error);
+    }
   }
 
   // Initialize Google API
@@ -63,6 +178,13 @@ class GoogleSheetsAPI {
       });
       
       this.isInitialized = true;
+      
+      // If we have stored authentication data, restore it
+      if (this.isAuthenticated && this.accessToken) {
+        this.gapi.client.setToken({ access_token: this.accessToken });
+        console.log('✅ Restored authentication state from storage');
+      }
+      
       console.log('✅ Google Sheets API initialized successfully');
       return true;
     } catch (error) {
@@ -110,11 +232,22 @@ class GoogleSheetsAPI {
     }
     
     try {
-      if (this.isAuthenticated && this.accessToken) {
-        return true;
+      // Check if we have a valid stored token first
+      if (this.isAuthenticated && this.accessToken && this.tokenExpiryTime) {
+        const now = Date.now();
+        if (now < this.tokenExpiryTime) {
+          // Set the token in gapi client
+          this.gapi.client.setToken({ access_token: this.accessToken });
+          console.log('✅ Using stored authentication token');
+          return true;
+        } else {
+          // Token expired, clear it
+          await this.clearPersistedAuth();
+          console.log('🔄 Token expired, requesting new authentication');
+        }
       }
       
-      // Request access token
+      // Request new access token
       return new Promise((resolve, reject) => {
         this.tokenClient.callback = async (response) => {
           if (response.error) {
@@ -123,6 +256,8 @@ class GoogleSheetsAPI {
           }
           
           this.accessToken = response.access_token;
+          // Set token expiry time (Google tokens typically expire in 1 hour)
+          this.tokenExpiryTime = Date.now() + (55 * 60 * 1000); // 55 minutes to be safe
           this.gapi.client.setToken({ access_token: this.accessToken });
           this.isAuthenticated = true;
           
@@ -138,11 +273,16 @@ class GoogleSheetsAPI {
             console.warn('Could not fetch user info:', err);
           }
           
-          console.log('✅ User authenticated successfully');
+          // Save authentication data persistently
+          await this.saveAuthData();
+          
+          console.log('✅ User authenticated successfully and saved persistently');
           resolve(true);
         };
         
-        this.tokenClient.requestAccessToken({ prompt: 'consent' });
+        // Only prompt for consent on first login, otherwise use existing consent
+        const promptBehavior = this.userInfo ? '' : 'consent';
+        this.tokenClient.requestAccessToken({ prompt: promptBehavior });
       });
     } catch (error) {
       console.error('❌ Authentication failed:', error);
@@ -152,25 +292,19 @@ class GoogleSheetsAPI {
 
   // Sign out user
   async signOut() {
-    if (this.isAuthenticated && this.accessToken) {
-      // Revoke the access token
-      try {
-        await fetch(`https://oauth2.googleapis.com/revoke?token=${this.accessToken}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        });
-      } catch (err) {
-        console.warn('Could not revoke token:', err);
+    try {
+      if (this.gapi && this.gapi.client) {
+        this.gapi.client.setToken(null);
       }
       
-      this.isAuthenticated = false;
-      this.accessToken = null;
-      this.userInfo = null;
-      this.spreadsheetId = null;
-      this.gapi.client.setToken(null);
-      console.log('✅ User signed out successfully');
+      // Clear persistent authentication data
+      await this.clearPersistedAuth();
+      
+      console.log('✅ User signed out successfully and cleared persistent data');
+      return true;
+    } catch (error) {
+      console.error('❌ Sign out failed:', error);
+      throw new Error(`Sign out failed: ${error.message}`);
     }
   }
 
@@ -233,6 +367,9 @@ class GoogleSheetsAPI {
       
       this.spreadsheetId = response.result.spreadsheetId;
       console.log('✅ Spreadsheet created with ID:', this.spreadsheetId);
+      
+      // Save spreadsheet ID persistently
+      await this.saveAuthData();
       
       // Set up headers
       await this.setupHeaders();
@@ -352,6 +489,10 @@ class GoogleSheetsAPI {
       });
       
       this.spreadsheetId = spreadsheetId;
+      
+      // Save spreadsheet connection persistently
+      await this.saveAuthData();
+      
       console.log('✅ Connected to spreadsheet:', response.result.properties.title);
       return response.result;
     } catch (error) {
