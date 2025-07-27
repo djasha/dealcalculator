@@ -1,0 +1,36 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="14" fill="url(#faviconGradient)"/>
+  
+  <!-- Target symbol -->
+  <g transform="translate(16, 12)">
+    <circle cx="0" cy="0" r="6" fill="none" stroke="white" stroke-width="1.5" opacity="0.9"/>
+    <circle cx="0" cy="0" r="3" fill="none" stroke="white" stroke-width="1" opacity="0.9"/>
+    <circle cx="0" cy="0" r="1.5" fill="url(#goldAccent)"/>
+  </g>
+  
+  <!-- Calculator symbol -->
+  <g transform="translate(16, 22)">
+    <rect x="-4" y="-2" width="8" height="4" rx="1" fill="white" opacity="0.95"/>
+    <rect x="-3" y="-1" width="6" height="1.5" rx="0.2" fill="#1f2937"/>
+    <text x="0" y="0.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="2" font-weight="bold" fill="url(#goldAccent)">$</text>
+    <!-- Mini buttons -->
+    <g fill="#6366f1" opacity="0.8">
+      <rect x="-2.5" y="1" width="1" height="0.8" rx="0.1"/>
+      <rect x="-1" y="1" width="1" height="0.8" rx="0.1"/>
+      <rect x="0.5" y="1" width="1" height="0.8" rx="0.1"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PNG Icon Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .icon-preview { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .icon-item { text-align: center; padding: 10px; background: white; border-radius: 8px; }
+        canvas { border: 1px solid #ddd; }
+        button { padding: 10px 20px; margin: 5px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #5856eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Chrome Extension PNG Icon Generator</h1>
+        
+        <div class="icon-preview" id="preview"></div>
+        
+        <button onclick="generateAllIcons()">Generate PNG Icons</button>
+        <button onclick="downloadAll()">Download All</button>
+    </div>
+
+    <script>
+        const iconSizes = [16, 32, 48, 128];
+        let generatedIcons = [];
+
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#6366f1');
+            gradient.addColorStop(0.5, '#8b5cf6');
+            gradient.addColorStop(1, '#a855f7');
+            
+            // Draw background circle
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, size/2 - 2, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw target circles
+            const centerX = size/2;
+            const centerY = size/2 - size*0.1;
+            
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = Math.max(1, size/16);
+            ctx.globalAlpha = 0.9;
+            
+            // Outer ring
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, size*0.25, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Inner ring
+            ctx.lineWidth = Math.max(1, size/20);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, size*0.15, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Center dot
+            const goldGradient = ctx.createLinearGradient(0, 0, size, size);
+            goldGradient.addColorStop(0, '#fbbf24');
+            goldGradient.addColorStop(1, '#f59e0b');
+            
+            ctx.fillStyle = goldGradient;
+            ctx.globalAlpha = 1;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, size*0.06, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw calculator
+            const calcY = size/2 + size*0.25;
+            const calcWidth = size*0.4;
+            const calcHeight = size*0.2;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillRect(centerX - calcWidth/2, calcY - calcHeight/2, calcWidth, calcHeight);
+            
+            // Calculator screen
+            ctx.fillStyle = '#1f2937';
+            const screenWidth = calcWidth * 0.8;
+            const screenHeight = calcHeight * 0.4;
+            ctx.fillRect(centerX - screenWidth/2, calcY - screenHeight/2 - calcHeight*0.1, screenWidth, screenHeight);
+            
+            // Dollar sign
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = `bold ${Math.max(8, size/8)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('$', centerX, calcY - calcHeight*0.1);
+        }
+
+        function generateAllIcons() {
+            const preview = document.getElementById('preview');
+            preview.innerHTML = '';
+            generatedIcons = [];
+            
+            iconSizes.forEach(size => {
+                const canvas = document.createElement('canvas');
+                drawIcon(canvas, size);
+                
+                // Create preview
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'icon-item';
+                previewDiv.innerHTML = `
+                    <div>icon-${size}.png</div>
+                    <canvas width="${size}" height="${size}" style="width: 64px; height: 64px;"></canvas>
+                    <div>${size}x${size}</div>
+                `;
+                
+                const previewCanvas = previewDiv.querySelector('canvas');
+                const previewCtx = previewCanvas.getContext('2d');
+                previewCtx.drawImage(canvas, 0, 0);
+                
+                preview.appendChild(previewDiv);
+                
+                // Store the generated icon
+                canvas.toBlob(blob => {
+                    generatedIcons.push({
+                        name: `icon-${size}.png`,
+                        blob: blob,
+                        size: size
+                    });
+                });
+            });
+        }
+
+        function downloadAll() {
+            if (generatedIcons.length === 0) {
+                alert('Please generate icons first!');
+                return;
+            }
+            
+            generatedIcons.forEach(icon => {
+                const url = URL.createObjectURL(icon.blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = icon.name;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Auto-generate on page load
+        window.onload = function() {
+            generateAllIcons();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+#!/usr/bin/env node
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '..');
+
+console.log('🎨 Generating icons from SVG...');
+
+// Create an HTML file that will generate PNG icons from SVG
+const iconGeneratorHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .icon-preview { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+        .icon-item { text-align: center; padding: 10px; background: white; border-radius: 8px; }
+        canvas { border: 1px solid #ddd; }
+        button { padding: 10px 20px; margin: 5px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #5856eb; }
+        .status { margin: 10px 0; padding: 10px; background: #e7f3ff; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Influencer Deal Calculator - Icon Generator</h1>
+        <div class="status" id="status">Ready to generate icons...</div>
+        
+        <div class="icon-preview" id="preview"></div>
+        
+        <button onclick="generateAllIcons()">Generate All Icons</button>
+        <button onclick="downloadAll()">Download All</button>
+        
+        <h2>Generated Icons:</h2>
+        <div id="downloads"></div>
+    </div>
+
+    <script>
+        const iconSizes = [
+            { size: 16, name: 'icon-16.png', desc: 'Extension Small' },
+            { size: 32, name: 'icon-32.png', desc: 'Extension Medium' },
+            { size: 48, name: 'icon-48.png', desc: 'Extension Large' },
+            { size: 128, name: 'icon-128.png', desc: 'Extension Store' },
+            { size: 180, name: 'apple-touch-icon.png', desc: 'iOS Home Screen' },
+            { size: 192, name: 'android-chrome-192x192.png', desc: 'Android Chrome' },
+            { size: 512, name: 'android-chrome-512x512.png', desc: 'Android Chrome Large' }
+        ];
+
+        let generatedIcons = [];
+
+        // SVG content for the favicon
+        const faviconSVG = \`<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <circle cx="16" cy="16" r="14" fill="url(#faviconGradient)"/>
+  
+  <g transform="translate(16, 12)">
+    <circle cx="0" cy="0" r="6" fill="none" stroke="white" stroke-width="1.5" opacity="0.9"/>
+    <circle cx="0" cy="0" r="3" fill="none" stroke="white" stroke-width="1" opacity="0.9"/>
+    <circle cx="0" cy="0" r="1.5" fill="url(#goldAccent)"/>
+  </g>
+  
+  <g transform="translate(16, 22)">
+    <rect x="-4" y="-2" width="8" height="4" rx="1" fill="white" opacity="0.95"/>
+    <rect x="-3" y="-1" width="6" height="1.5" rx="0.2" fill="#1f2937"/>
+    <text x="0" y="0.5" text-anchor="middle" font-family="Arial, sans-serif" font-size="2" font-weight="bold" fill="url(#goldAccent)">$</text>
+    <g fill="#6366f1" opacity="0.8">
+      <rect x="-2.5" y="1" width="1" height="0.8" rx="0.1"/>
+      <rect x="-1" y="1" width="1" height="0.8" rx="0.1"/>
+      <rect x="0.5" y="1" width="1" height="0.8" rx="0.1"/>
+    </g>
+  </g>
+</svg>\`;
+
+        function generateAllIcons() {
+            const preview = document.getElementById('preview');
+            const status = document.getElementById('status');
+            preview.innerHTML = '';
+            generatedIcons = [];
+            
+            status.innerHTML = 'Generating icons...';
+            
+            iconSizes.forEach((iconConfig, index) => {
+                setTimeout(() => {
+                    generateIcon(iconConfig);
+                    if (index === iconSizes.length - 1) {
+                        status.innerHTML = 'All icons generated! Click "Download All" to save them.';
+                    }
+                }, index * 100);
+            });
+        }
+
+        function generateIcon(config) {
+            const canvas = document.createElement('canvas');
+            canvas.width = config.size;
+            canvas.height = config.size;
+            const ctx = canvas.getContext('2d');
+            
+            // Create SVG image
+            const svgBlob = new Blob([faviconSVG], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(svgBlob);
+            const img = new Image();
+            
+            img.onload = function() {
+                // Draw the SVG to canvas at the specified size
+                ctx.drawImage(img, 0, 0, config.size, config.size);
+                
+                // Create preview
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'icon-item';
+                previewDiv.innerHTML = \`
+                    <div>\${config.desc}</div>
+                    <canvas width="\${config.size}" height="\${config.size}" style="width: 64px; height: 64px;"></canvas>
+                    <div>\${config.size}x\${config.size}</div>
+                    <div>\${config.name}</div>
+                \`;
+                
+                const previewCanvas = previewDiv.querySelector('canvas');
+                const previewCtx = previewCanvas.getContext('2d');
+                previewCtx.drawImage(canvas, 0, 0);
+                
+                document.getElementById('preview').appendChild(previewDiv);
+                
+                // Store the generated icon
+                canvas.toBlob(blob => {
+                    generatedIcons.push({
+                        name: config.name,
+                        blob: blob,
+                        size: config.size
+                    });
+                });
+                
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+
+        function downloadAll() {
+            if (generatedIcons.length === 0) {
+                alert('Please generate icons first!');
+                return;
+            }
+            
+            const downloadsDiv = document.getElementById('downloads');
+            downloadsDiv.innerHTML = '<h3>Downloading icons...</h3>';
+            
+            generatedIcons.forEach(icon => {
+                const url = URL.createObjectURL(icon.blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = icon.name;
+                a.textContent = icon.name;
+                a.style.display = 'block';
+                a.style.margin = '5px 0';
+                downloadsDiv.appendChild(a);
+                a.click();
+                
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            });
+            
+            downloadsDiv.innerHTML += '<p>✅ All icons downloaded!</p>';
+        }
+
+        // Auto-generate on page load
+        window.onload = function() {
+            setTimeout(generateAllIcons, 500);
+        };
+    </script>
+</body>
+</html>
+`;
+
+// Write the HTML file
+const htmlPath = path.join(projectRoot, 'generate-icons.html');
+fs.writeFileSync(htmlPath, iconGeneratorHTML);
+
+console.log('✅ Icon generator created at: generate-icons.html');
+console.log('🌐 Open this file in a browser to generate and download all icon sizes');
+console.log('📁 Save the downloaded icons to public/icons/ directory');
+console.log('');
+const iconSizes = [
+  { size: 16, name: 'icon-16.png', desc: 'Extension Small' },
+  { size: 32, name: 'icon-32.png', desc: 'Extension Medium' },
+  { size: 48, name: 'icon-48.png', desc: 'Extension Large' },
+  { size: 128, name: 'icon-128.png', desc: 'Extension Store' },
+  { size: 180, name: 'apple-touch-icon.png', desc: 'iOS Home Screen' },
+  { size: 192, name: 'android-chrome-192x192.png', desc: 'Android Chrome' },
+  { size: 512, name: 'android-chrome-512x512.png', desc: 'Android Chrome Large' }
+];
+
+console.log('Icon sizes that will be generated:');
+iconSizes.forEach(icon => {
+  console.log(`  - ${icon.name} (${icon.size}x${icon.size}) - ${icon.desc}`);
+});

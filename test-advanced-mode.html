@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Mode Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .test-step {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+        }
+        .status {
+            font-weight: bold;
+        }
+        .pass { color: #4ade80; }
+        .fail { color: #f87171; }
+        .pending { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Advanced Mode Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Plan for Advanced Mode</h2>
+        <div class="test-step">
+            <strong>Step 1:</strong> Fill in sample data (Price: $1000, Views: 100000, Videos: 2, Stories: 1)
+        </div>
+        <div class="test-step">
+            <strong>Step 2:</strong> Select Instagram and YouTube platforms
+        </div>
+        <div class="test-step">
+            <strong>Step 3:</strong> Verify basic calculation works in simple mode
+        </div>
+        <div class="test-step">
+            <strong>Step 4:</strong> Toggle Advanced Mode ON
+        </div>
+        <div class="test-step">
+            <strong>Step 5:</strong> Verify advanced weighting sliders appear
+        </div>
+        <div class="test-step">
+            <strong>Step 6:</strong> Test global weight sliders (video/story)
+        </div>
+        <div class="test-step">
+            <strong>Step 7:</strong> Test platform-specific weight sliders
+        </div>
+        <div class="test-step">
+            <strong>Step 8:</strong> Verify calculations update when weights change
+        </div>
+        <div class="test-step">
+            <strong>Step 9:</strong> Toggle Advanced Mode OFF and verify return to simple mode
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Expected Results</h2>
+        <div class="test-step">
+            <strong>Simple Mode:</strong> Per-video and per-story prices should be the same across all platforms
+        </div>
+        <div class="test-step">
+            <strong>Advanced Mode:</strong> Prices should vary based on custom weights
+        </div>
+        <div class="test-step">
+            <strong>Price Distribution:</strong> Total of all platform prices should equal deal price ($1000)
+        </div>
+        <div class="test-step">
+            <strong>Per 1k Views:</strong> Display should show price per 1,000 views instead of per view
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Manual Test Instructions</h2>
+        <ol>
+            <li>Open the calculator app in another tab</li>
+            <li>Follow the test steps above</li>
+            <li>Verify each expected result</li>
+            <li>Check that the help section expands/collapses</li>
+            <li>Test copy-to-clipboard functionality</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Sample Test Data</h2>
+        <div class="test-step">
+            <strong>Total Price:</strong> $1000<br>
+            <strong>Total Views:</strong> 100000<br>
+            <strong>Video Posts:</strong> 2<br>
+            <strong>Story Posts:</strong> 1<br>
+            <strong>Platforms:</strong> Instagram ✓, YouTube ✓
+        </div>
+    </div>
+</body>
+</html>
