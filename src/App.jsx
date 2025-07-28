@@ -54,6 +54,15 @@ function App() {
 
   // Google Sheets Integration State
   const [googleSheetsStatus, setGoogleSheetsStatus] = useState("disconnected");
+  const [copyFeedback, setCopyFeedback] = useState({});
+
+  // Helper function to show checkmark feedback for copy actions
+  const showCopyFeedback = useCallback((key) => {
+    setCopyFeedback(prev => ({ ...prev, [key]: true }));
+    setTimeout(() => {
+      setCopyFeedback(prev => ({ ...prev, [key]: false }));
+    }, 5000);
+  }, []);
 
   // Input History State (last 3 values for each field)
   const [priceHistory, setPriceHistory] = useState(
@@ -69,6 +78,8 @@ function App() {
     JSON.parse(localStorage.getItem("storyCountHistory")) || []
   );
 
+  // Removed toast notifications to keep the app lightweight
+
   // Input History Helper Functions
   const addToHistory = useCallback((value, setHistory, storageKey) => {
     if (!value || value === "0" || value === "") return;
@@ -82,6 +93,8 @@ function App() {
       return newHistory;
     });
   }, []);
+
+
 
   // Helper function for formatting large numbers
   const formatLargeNumber = useCallback((num) => {
@@ -332,25 +345,22 @@ function App() {
   ]);
 
   // Copy to clipboard function
-  const copyToClipboard = async (text) => {
+  const copyToClipboard = async (text, feedbackKey) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert("Copied to clipboard!");
-    } catch (err) {
-      console.error("Failed to copy: ", err);
-      alert("Failed to copy to clipboard");
+      if (feedbackKey) showCopyFeedback(feedbackKey);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
     }
   };
 
-  // Copy number only (without currency signs or commas)
-  const copyNumber = async (value) => {
-    const numberOnly = value.toString().replace(/[^0-9.]/g, "");
+  const copyNumber = async (number, feedbackKey) => {
+    const numberOnly = number.toString().replace(/[^0-9.]/g, "");
     try {
       await navigator.clipboard.writeText(numberOnly);
-      alert(`Copied: ${numberOnly}`);
-    } catch (err) {
-      console.error("Failed to copy: ", err);
-      alert("Failed to copy to clipboard");
+      if (feedbackKey) showCopyFeedback(feedbackKey);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
     }
   };
 
@@ -388,6 +398,20 @@ function App() {
     storyCount,
   ]);
 
+  // Google Sheets Integration Handlers
+  // TODO: Re-add syncDealToGoogleSheets function after fixing temporal dead zone
+  // const syncDealToGoogleSheets = useCallback(async (dealEntry) => {
+  //   try {
+  //     if (googleSheetsAPI.getSpreadsheetInfo().isConnected) {
+  //       await googleSheetsAPI.syncDeal(dealEntry, dealEntry.profileName);
+  //       setGoogleSheetsStatus("synced");
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to sync deal to Google Sheets:", error);
+  //     setGoogleSheetsStatus("error");
+  //   }
+  // }, []);
+
   // Profile management handlers
   const handleProfileSelect = useCallback(
     (profile) => {
@@ -421,7 +445,7 @@ function App() {
       };
 
       if (!profileData.name) {
-        alert("Please enter a profile name");
+        showCopyFeedback("profile-error");
         return;
       }
 
@@ -432,18 +456,20 @@ function App() {
       setAvailableProfiles(profiles);
       setFilteredProfiles(profiles);
 
-      alert("Profile saved successfully!");
+      showCopyFeedback("profile-saved");
     } catch (error) {
-      alert("Failed to save profile: " + error.message);
+      console.error("Failed to save profile:", error);
     }
   }, [
     selectedProfile,
     profileName,
     promoCode,
+    isAdvancedMode,
     customWeights,
     globalVideoWeight,
     globalStoryWeight,
-    isAdvancedMode,
+    showCopyFeedback,
+
   ]);
 
   const handleDeleteProfile = useCallback(
@@ -497,12 +523,13 @@ function App() {
       const history = dealHistoryStorage.getByProfileId(selectedProfile.id);
       setDealHistory(history);
 
-      alert("Deal saved to history!");
+      showCopyFeedback("deal-saved");
 
       // Auto-sync to Google Sheets if connected
-      await syncDealToGoogleSheets(dealEntry);
+      // TODO: Re-enable Google Sheets sync after fixing temporal dead zone
+      // await syncDealToGoogleSheets(dealEntry);
     } catch (error) {
-      alert("Failed to save deal: " + error.message);
+      console.error("Failed to save deal:", error);
     }
   }, [
     selectedProfile,
@@ -516,20 +543,9 @@ function App() {
     customWeights,
     globalVideoWeight,
     globalStoryWeight,
-  ]);
+    showCopyFeedback,
 
-  // Google Sheets Integration Handlers
-  const syncDealToGoogleSheets = async (dealEntry) => {
-    try {
-      if (googleSheetsAPI.getSpreadsheetInfo().isConnected) {
-        await googleSheetsAPI.syncDeal(dealEntry, dealEntry.profileName);
-        setGoogleSheetsStatus("synced");
-      }
-    } catch (error) {
-      console.error("Failed to sync deal to Google Sheets:", error);
-      setGoogleSheetsStatus("error");
-    }
-  };
+  ]);
 
   const syncProfileToGoogleSheets = async (profile) => {
     try {
@@ -565,7 +581,8 @@ function App() {
             await syncProfileToGoogleSheets(profile);
             const deals = dealHistoryStorage.getByProfileId(profile.id);
             for (const deal of deals) {
-              await syncDealToGoogleSheets(deal);
+              // TODO: Re-enable Google Sheets sync after fixing temporal dead zone
+              // await syncDealToGoogleSheets(deal);
             }
           }
           setGoogleSheetsStatus("synced");
@@ -708,7 +725,7 @@ function App() {
                         onChange={(e) => handlePriceChange(e.target.value)}
                         onBlur={(e) => handlePriceBlur(e.target.value)}
                         placeholder="Enter total deal price"
-                        className="w-full px-4 py-2 pr-12 bg-white/10 border border-white/30 rounded-lg text-black placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 [color-scheme:dark] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full px-4 py-2 pr-12 bg-white/20 border border-white/40 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/30 [color-scheme:dark] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <div className="absolute right-0 top-0 h-full flex flex-col border-l border-white/30">
                         <button
@@ -756,7 +773,7 @@ function App() {
                         value={totalViews}
                         onChange={(e) => handleViewsChange(e.target.value)}
                         onBlur={(e) => handleViewsBlur(e.target.value)}
-                        className="w-full px-4 py-2 pr-12 bg-white/90 border border-white/30 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full px-4 py-2 pr-12 bg-white/20 border border-white/40 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         placeholder="Enter expected total views"
                       />
                       <div className="absolute right-0 top-0 h-full flex flex-col border-l border-white/30">
@@ -817,7 +834,7 @@ function App() {
                         onChange={(e) => handleVideoCountChange(e.target.value)}
                         onBlur={(e) => handleVideoCountBlur(e.target.value)}
                         placeholder="0"
-                        className="w-full px-4 py-2 pr-12 bg-white/90 border border-white/30 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full px-4 py-2 pr-12 bg-white/20 border border-white/40 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <div className="absolute right-0 top-0 h-full flex flex-col border-l border-white/30">
                         <button
@@ -862,7 +879,7 @@ function App() {
                         onChange={(e) => handleStoryCountChange(e.target.value)}
                         onBlur={(e) => handleStoryCountBlur(e.target.value)}
                         placeholder="0"
-                        className="w-full px-4 py-2 pr-12 bg-white/90 border border-white/30 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full px-4 py-2 pr-12 bg-white/20 border border-white/40 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <div className="absolute right-0 top-0 h-full flex flex-col border-l border-white/30">
                         <button
@@ -1191,11 +1208,11 @@ function App() {
                             Total Deal
                           </div>
                           <button
-                            onClick={() => copyNumber(parseFloat(totalPrice))}
+                            onClick={() => copyNumber(parseFloat(totalPrice), "total-price")}
                             className="text-purple-300 hover:text-white text-xs px-2 py-1 rounded transition-colors"
                             title="Copy number only"
                           >
-                            📋
+                            {copyFeedback["total-price"] ? "✅" : "📋"}
                           </button>
                         </div>
                         <div className="text-white text-lg font-semibold">
@@ -1212,13 +1229,13 @@ function App() {
                               copyNumber(
                                 calculations.averagePricePerThousandViews.toFixed(
                                   2
-                                )
+                                ), "price-per-1k"
                               )
                             }
                             className="text-purple-300 hover:text-white text-xs px-2 py-1 rounded transition-colors"
                             title="Copy number only"
                           >
-                            📋
+                            {copyFeedback["price-per-1k"] ? "✅" : "📋"}
                           </button>
                         </div>
                         <div className="text-white text-lg font-semibold">
@@ -1300,20 +1317,21 @@ function App() {
                                           <button
                                             onClick={() =>
                                               copyNumber(
-                                                data.pricePerVideo.toFixed(2)
+                                                data.pricePerVideo.toFixed(2),
+                                                `${platform}-video-price`
                                               )
                                             }
                                             className="text-purple-300 hover:text-white transition-colors p-1 rounded bg-white/10 hover:bg-white/20"
                                             title="Copy price per video"
                                           >
-                                            <svg
-                                              className="w-3.5 h-3.5"
-                                              fill="currentColor"
-                                              viewBox="0 0 20 20"
-                                            >
-                                              <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                              <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                                            </svg>
+                                            {copyFeedback[`${platform}-video-price`] ? (
+                                              <span className="text-green-400 text-sm">✅</span>
+                                            ) : (
+                                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                              </svg>
+                                            )}
                                           </button>
                                         </div>
                                         <div className="text-xs text-purple-300">
@@ -1332,20 +1350,21 @@ function App() {
                                           <button
                                             onClick={() =>
                                               copyNumber(
-                                                Math.round(data.viewsPerVideo)
+                                                Math.round(data.viewsPerVideo),
+                                                `${platform}-video-views`
                                               )
                                             }
                                             className="text-blue-300 hover:text-white transition-colors p-1 rounded bg-white/10 hover:bg-white/20"
                                             title="Copy views per video"
                                           >
-                                            <svg
-                                              className="w-3.5 h-3.5"
-                                              fill="currentColor"
-                                              viewBox="0 0 20 20"
-                                            >
-                                              <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                              <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                                            </svg>
+                                            {copyFeedback[`${platform}-video-views`] ? (
+                                              <span className="text-green-400 text-sm">✅</span>
+                                            ) : (
+                                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                              </svg>
+                                            )}
                                           </button>
                                         </div>
                                         <div className="text-xs text-blue-300">
@@ -1375,20 +1394,21 @@ function App() {
                                           <button
                                             onClick={() =>
                                               copyNumber(
-                                                data.pricePerStory.toFixed(2)
+                                                data.pricePerStory.toFixed(2),
+                                                `${platform}-story-price`
                                               )
                                             }
                                             className="text-purple-300 hover:text-white transition-colors p-1 rounded bg-white/10 hover:bg-white/20"
                                             title="Copy price per story"
                                           >
-                                            <svg
-                                              className="w-3.5 h-3.5"
-                                              fill="currentColor"
-                                              viewBox="0 0 20 20"
-                                            >
-                                              <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                              <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                                            </svg>
+                                            {copyFeedback[`${platform}-story-price`] ? (
+                                              <span className="text-green-400 text-sm">✅</span>
+                                            ) : (
+                                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                              </svg>
+                                            )}
                                           </button>
                                         </div>
                                         <div className="text-xs text-purple-300">
@@ -1407,20 +1427,21 @@ function App() {
                                           <button
                                             onClick={() =>
                                               copyNumber(
-                                                Math.round(data.viewsPerStory)
+                                                Math.round(data.viewsPerStory),
+                                                `${platform}-story-views`
                                               )
                                             }
                                             className="text-blue-300 hover:text-white transition-colors p-1 rounded bg-white/10 hover:bg-white/20"
                                             title="Copy views per story"
                                           >
-                                            <svg
-                                              className="w-3.5 h-3.5"
-                                              fill="currentColor"
-                                              viewBox="0 0 20 20"
-                                            >
-                                              <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                                              <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                                            </svg>
+                                            {copyFeedback[`${platform}-story-views`] ? (
+                                              <span className="text-green-400 text-sm">✅</span>
+                                            ) : (
+                                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                                              </svg>
+                                            )}
                                           </button>
                                         </div>
                                         <div className="text-xs text-blue-300">
@@ -1471,7 +1492,7 @@ function App() {
                       type="text"
                       value={profileSearch}
                       onChange={(e) => setProfileSearch(e.target.value)}
-                      className="w-full px-4 py-2 bg-white/90 border border-white/30 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-2 bg-white/20 border border-white/40 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/30"
                       placeholder="Search existing profiles..."
                     />
                   </div>
@@ -1516,7 +1537,7 @@ function App() {
                         type="text"
                         value={profileName}
                         onChange={(e) => setProfileName(e.target.value)}
-                        className="w-full px-4 py-2 bg-white/90 border border-white/30 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-2 bg-white/20 border border-white/40 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/30"
                         placeholder="Enter profile name"
                       />
                     </div>
@@ -1528,7 +1549,7 @@ function App() {
                         type="text"
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value)}
-                        className="w-full px-4 py-2 bg-white/90 border border-white/30 rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-2 bg-white/20 border border-white/40 rounded-lg text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white/30"
                         placeholder="Optional promo code"
                       />
                     </div>
@@ -1626,23 +1647,33 @@ function App() {
           </div>
         </div>
       </div>
-      
+
+
+
       {/* Footer with Chrome Extension Download */}
       <footer className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-t border-white/10 mt-8">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-white font-semibold">Influencer Deal Calculator</h3>
-                <p className="text-purple-300 text-sm">Professional pricing calculations with Google Sheets sync</p>
+                <h3 className="text-white font-semibold">
+                  Influencer Deal Calculator
+                </h3>
+                <p className="text-purple-300 text-sm">
+                  Professional pricing calculations with Google Sheets sync
+                </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <a
                 href="/extension-install-guide.html"
@@ -1650,15 +1681,21 @@ function App() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
                 </svg>
                 Install Chrome Extension
               </a>
-              
+
               <div className="text-purple-300 text-sm">
                 <p>Also available as a Chrome extension</p>
-                <p className="text-xs opacity-75">One-click install • Side panel integration</p>
+                <p className="text-xs opacity-75">
+                  One-click install • Side panel integration
+                </p>
               </div>
             </div>
           </div>
