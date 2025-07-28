@@ -162,7 +162,17 @@ const GoogleSheetsIntegration = ({ onSyncComplete }) => {
 
   return (
     <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-      <h2 className="text-xl font-semibold text-white mb-4">📊 Google Sheets Integration</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-white">📊 Google Sheets Integration</h2>
+        {isAuthenticated && (
+          <button
+            onClick={handleSignOut}
+            className="text-purple-300 hover:text-white text-sm px-3 py-1 rounded transition-colors"
+          >
+            Sign Out
+          </button>
+        )}
+      </div>
       
       {error && (
         <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-4">
@@ -201,22 +211,14 @@ const GoogleSheetsIntegration = ({ onSyncComplete }) => {
       ) : (
         <div className="space-y-4">
           {/* User Info */}
-          <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-            <div className="flex items-center space-x-3">
-              {userInfo?.imageUrl && (
-                <img src={userInfo.imageUrl} alt="Profile" className="w-8 h-8 rounded-full" />
-              )}
-              <div>
-                <p className="text-white font-medium">{userInfo?.name}</p>
-                <p className="text-purple-300 text-sm">{userInfo?.email}</p>
-              </div>
+          <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg">
+            {userInfo?.imageUrl && (
+              <img src={userInfo.imageUrl} alt="Profile" className="w-8 h-8 rounded-full" />
+            )}
+            <div>
+              <p className="text-white font-medium">{userInfo?.name}</p>
+              <p className="text-purple-300 text-sm">{userInfo?.email}</p>
             </div>
-            <button
-              onClick={handleSignOut}
-              className="text-purple-300 hover:text-white text-sm px-3 py-1 rounded transition-colors"
-            >
-              Sign Out
-            </button>
           </div>
 
           {/* Spreadsheet Status */}

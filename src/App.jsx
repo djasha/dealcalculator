@@ -399,18 +399,17 @@ function App() {
   ]);
 
   // Google Sheets Integration Handlers
-  // TODO: Re-add syncDealToGoogleSheets function after fixing temporal dead zone
-  // const syncDealToGoogleSheets = useCallback(async (dealEntry) => {
-  //   try {
-  //     if (googleSheetsAPI.getSpreadsheetInfo().isConnected) {
-  //       await googleSheetsAPI.syncDeal(dealEntry, dealEntry.profileName);
-  //       setGoogleSheetsStatus("synced");
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to sync deal to Google Sheets:", error);
-  //     setGoogleSheetsStatus("error");
-  //   }
-  // }, []);
+  const syncDealToGoogleSheets = useCallback(async (dealEntry) => {
+    try {
+      if (googleSheetsAPI.getSpreadsheetInfo().isConnected) {
+        await googleSheetsAPI.syncDeal(dealEntry, dealEntry.profileName);
+        setGoogleSheetsStatus("synced");
+      }
+    } catch (error) {
+      console.error("Failed to sync deal to Google Sheets:", error);
+      setGoogleSheetsStatus("error");
+    }
+  }, []);
 
   // Profile management handlers
   const handleProfileSelect = useCallback(
@@ -469,7 +468,6 @@ function App() {
     globalVideoWeight,
     globalStoryWeight,
     showCopyFeedback,
-
   ]);
 
   const handleDeleteProfile = useCallback(
@@ -526,8 +524,7 @@ function App() {
       showCopyFeedback("deal-saved");
 
       // Auto-sync to Google Sheets if connected
-      // TODO: Re-enable Google Sheets sync after fixing temporal dead zone
-      // await syncDealToGoogleSheets(dealEntry);
+      await syncDealToGoogleSheets(dealEntry);
     } catch (error) {
       console.error("Failed to save deal:", error);
     }
@@ -544,7 +541,7 @@ function App() {
     globalVideoWeight,
     globalStoryWeight,
     showCopyFeedback,
-
+    syncDealToGoogleSheets,
   ]);
 
   const syncProfileToGoogleSheets = async (profile) => {
@@ -581,8 +578,7 @@ function App() {
             await syncProfileToGoogleSheets(profile);
             const deals = dealHistoryStorage.getByProfileId(profile.id);
             for (const deal of deals) {
-              // TODO: Re-enable Google Sheets sync after fixing temporal dead zone
-              // await syncDealToGoogleSheets(deal);
+              await syncDealToGoogleSheets(deal);
             }
           }
           setGoogleSheetsStatus("synced");
@@ -946,25 +942,51 @@ function App() {
                   }).map(([platform, info]) => (
                     <label
                       key={platform}
-                      className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-white/5 transition-colors"
+                      className="flex items-center space-x-3 cursor-pointer p-3 rounded-xl hover:bg-white/10 transition-all duration-200 group"
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectedPlatforms[platform]}
-                        onChange={(e) =>
-                          setSelectedPlatforms((prev) => ({
-                            ...prev,
-                            [platform]: e.target.checked,
-                          }))
-                        }
-                        className="w-5 h-5 text-purple-600 bg-white/20 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                      <span className="text-white font-medium flex items-center space-x-2">
+                      {/* Custom Modern Checkbox */}
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={selectedPlatforms[platform]}
+                          onChange={(e) =>
+                            setSelectedPlatforms((prev) => ({
+                              ...prev,
+                              [platform]: e.target.checked,
+                            }))
+                          }
+                          className="sr-only"
+                        />
+                        <div
+                          className={`w-5 h-5 rounded-lg border-2 transition-all duration-200 flex items-center justify-center ${
+                            selectedPlatforms[platform]
+                              ? "bg-gradient-to-r from-purple-500 to-purple-600 border-purple-500 shadow-lg shadow-purple-500/25"
+                              : "bg-white/10 border-white/30 group-hover:border-purple-400 group-hover:bg-white/15"
+                          }`}
+                        >
+                          {selectedPlatforms[platform] && (
+                            <svg
+                              className="w-3 h-3 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={3}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-white font-medium flex items-center space-x-2.5 group-hover:text-purple-100 transition-colors">
                         {info.icon.startsWith("/icons/") ? (
                           <img
                             src={info.icon}
                             alt={info.name}
-                            className="w-5 h-5"
+                            className="w-5 h-5 opacity-90 group-hover:opacity-100 transition-opacity"
                           />
                         ) : (
                           <span className="text-lg">{info.icon}</span>
@@ -1208,7 +1230,9 @@ function App() {
                             Total Deal
                           </div>
                           <button
-                            onClick={() => copyNumber(parseFloat(totalPrice), "total-price")}
+                            onClick={() =>
+                              copyNumber(parseFloat(totalPrice), "total-price")
+                            }
                             className="text-purple-300 hover:text-white text-xs px-2 py-1 rounded transition-colors"
                             title="Copy number only"
                           >
@@ -1229,7 +1253,8 @@ function App() {
                               copyNumber(
                                 calculations.averagePricePerThousandViews.toFixed(
                                   2
-                                ), "price-per-1k"
+                                ),
+                                "price-per-1k"
                               )
                             }
                             className="text-purple-300 hover:text-white text-xs px-2 py-1 rounded transition-colors"
@@ -1324,10 +1349,18 @@ function App() {
                                             className="text-purple-300 hover:text-white transition-colors p-1 rounded bg-white/10 hover:bg-white/20"
                                             title="Copy price per video"
                                           >
-                                            {copyFeedback[`${platform}-video-price`] ? (
-                                              <span className="text-green-400 text-sm">✅</span>
+                                            {copyFeedback[
+                                              `${platform}-video-price`
+                                            ] ? (
+                                              <span className="text-green-400 text-sm">
+                                                ✅
+                                              </span>
                                             ) : (
-                                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                              <svg
+                                                className="w-3.5 h-3.5"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                              >
                                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                                               </svg>
@@ -1357,10 +1390,18 @@ function App() {
                                             className="text-blue-300 hover:text-white transition-colors p-1 rounded bg-white/10 hover:bg-white/20"
                                             title="Copy views per video"
                                           >
-                                            {copyFeedback[`${platform}-video-views`] ? (
-                                              <span className="text-green-400 text-sm">✅</span>
+                                            {copyFeedback[
+                                              `${platform}-video-views`
+                                            ] ? (
+                                              <span className="text-green-400 text-sm">
+                                                ✅
+                                              </span>
                                             ) : (
-                                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                              <svg
+                                                className="w-3.5 h-3.5"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                              >
                                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                                               </svg>
@@ -1401,10 +1442,18 @@ function App() {
                                             className="text-purple-300 hover:text-white transition-colors p-1 rounded bg-white/10 hover:bg-white/20"
                                             title="Copy price per story"
                                           >
-                                            {copyFeedback[`${platform}-story-price`] ? (
-                                              <span className="text-green-400 text-sm">✅</span>
+                                            {copyFeedback[
+                                              `${platform}-story-price`
+                                            ] ? (
+                                              <span className="text-green-400 text-sm">
+                                                ✅
+                                              </span>
                                             ) : (
-                                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                              <svg
+                                                className="w-3.5 h-3.5"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                              >
                                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                                               </svg>
@@ -1434,10 +1483,18 @@ function App() {
                                             className="text-blue-300 hover:text-white transition-colors p-1 rounded bg-white/10 hover:bg-white/20"
                                             title="Copy views per story"
                                           >
-                                            {copyFeedback[`${platform}-story-views`] ? (
-                                              <span className="text-green-400 text-sm">✅</span>
+                                            {copyFeedback[
+                                              `${platform}-story-views`
+                                            ] ? (
+                                              <span className="text-green-400 text-sm">
+                                                ✅
+                                              </span>
                                             ) : (
-                                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                              <svg
+                                                className="w-3.5 h-3.5"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                              >
                                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
                                               </svg>
@@ -1606,14 +1663,37 @@ function App() {
                       {dealHistory.map((deal) => (
                         <div
                           key={deal.id}
-                          className="bg-white/5 rounded-lg p-3"
+                          className="bg-white/5 rounded-lg p-3 cursor-pointer hover:bg-white/10 transition-colors"
+                          onClick={() => {
+                            // Auto-populate all fields from the saved deal
+                            setTotalPrice(deal.totalPrice.toString());
+                            setTotalViews(deal.totalViews.toString());
+                            setVideoCount(deal.videoCount);
+                            setStoryCount(deal.storyCount);
+                            setSelectedPlatforms(deal.selectedPlatforms);
+
+                            // Set advanced mode settings if they exist
+                            if (deal.isAdvancedMode && deal.customWeights) {
+                              setIsAdvancedMode(true);
+                              setCustomWeights(deal.customWeights);
+                            }
+                            if (deal.globalWeights) {
+                              setGlobalVideoWeight(deal.globalWeights.video);
+                              setGlobalStoryWeight(deal.globalWeights.story);
+                            }
+
+                            // Show feedback that deal was loaded
+                            showCopyFeedback("deal-loaded");
+                          }}
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="text-white font-medium">
                               ${deal.totalPrice.toLocaleString()}
                             </div>
                             <div className="text-xs text-purple-300">
-                              {new Date(deal.createdAt).toLocaleDateString()}
+                              {new Date(
+                                deal.timestamp || deal.createdAt
+                              ).toLocaleDateString()}
                             </div>
                           </div>
                           <div className="text-sm text-purple-200">
@@ -1647,8 +1727,6 @@ function App() {
           </div>
         </div>
       </div>
-
-
 
       {/* Footer with Chrome Extension Download */}
       <footer className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-t border-white/10 mt-8">
