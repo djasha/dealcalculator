@@ -4,6 +4,8 @@ import "./slider.css";
 import googleSheetsAPI from "./utils/googleSheets";
 import { dealHistoryStorage, profileStorage } from "./utils/storage";
 
+/* global chrome */
+
 // Default weights for Simple Mode (matching user example: videos ~83%, stories ~17%)
 // Default weight distribution (percentages out of 100%)
 // Facebook: 50%, Instagram: 20%, TikTok: 20%, FB Story: 5%, IG Story: 5%
@@ -16,6 +18,9 @@ const DEFAULT_WEIGHTS = {
 };
 
 function App() {
+  // Chrome extension detection
+  const isExtension = typeof chrome !== 'undefined' && chrome.storage;
+
   // Deal information state
   const [totalPrice, setTotalPrice] = useState("");
   const [totalViews, setTotalViews] = useState("");
@@ -1718,18 +1723,21 @@ function App() {
                   )}
                 </div>
 
-                {/* Google Sheets Integration */}
-                <GoogleSheetsIntegration
-                  onSyncComplete={handleGoogleSheetsSync}
-                />
+                {/* Google Sheets Integration - Disabled in Chrome Extension */}
+                {!isExtension && (
+                  <GoogleSheetsIntegration
+                    onSyncComplete={handleGoogleSheetsSync}
+                  />
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer with Chrome Extension Download */}
-      <footer className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-t border-white/10 mt-8">
+      {/* Footer with Chrome Extension Download - Hidden in Extension */}
+      {!isExtension && (
+        <footer className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-t border-white/10 mt-8">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -1778,7 +1786,8 @@ function App() {
             </div>
           </div>
         </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }
