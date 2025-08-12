@@ -41,11 +41,9 @@ function App() {
 
   // Advanced Mode: Custom Weights
   const [customWeights, setCustomWeights] = useState(DEFAULT_WEIGHTS);
-  const [globalVideoWeight, setGlobalVideoWeight] = useState(6);
-  const [globalStoryWeight, setGlobalStoryWeight] = useState(1);
-
-  // Help section state
-  const [isHelpExpanded, setIsHelpExpanded] = useState(false);
+  
+  // Global Content Weight: Controls video vs story distribution (0-100, where 100 = all videos, 0 = all stories)
+  const [globalVideoWeight, setGlobalVideoWeight] = useState(80); // Default: 80% videos, 20% stories
 
   // Influencer Profile State
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -171,7 +169,6 @@ function App() {
       selectedPlatformKeys.filter((p) => p === "instagram" || p === "facebook")
         .length;
 
-    // Calculate proportional weight distribution
     // Get base weights for selected platforms
     const baseVideoWeights = {};
     const baseStoryWeights = {};
@@ -180,12 +177,8 @@ function App() {
       const weights = isAdvancedMode
         ? customWeights[platform]
         : DEFAULT_WEIGHTS[platform];
-      baseVideoWeights[platform] = isAdvancedMode
-        ? globalVideoWeight
-        : weights.video;
-      baseStoryWeights[platform] = isAdvancedMode
-        ? globalStoryWeight
-        : weights.story;
+      baseVideoWeights[platform] = weights.video;
+      baseStoryWeights[platform] = weights.story;
     });
 
     // Calculate total base weights for selected platforms
@@ -197,103 +190,74 @@ function App() {
       .filter((p) => p === "instagram" || p === "facebook")
       .reduce((sum, platform) => sum + baseStoryWeights[platform], 0);
 
-    // Calculate proportional weights (redistribute to maintain 100% total)
-    const proportionalVideoWeights = {};
-    const proportionalStoryWeights = {};
+    // FIXED: Apply global video vs story weight distribution
+    const globalStoryWeight = 100 - globalVideoWeight;
+    
+    // Calculate total budget allocation for videos and stories
+    const totalVideoBudget = (globalVideoWeight / 100) * price;
+    const totalStoryBudget = (globalStoryWeight / 100) * price;
+    
+    // Calculate normalized platform weights within video and story budgets
+    const normalizedVideoWeights = {};
+    const normalizedStoryWeights = {};
 
-    if (!isAdvancedMode) {
-      // In simple mode, redistribute weights proportionally
+    if (totalBaseVideoWeight > 0 && totalVideoBudget > 0) {
       selectedPlatformKeys.forEach((platform) => {
-        proportionalVideoWeights[platform] =
-          totalBaseVideoWeight > 0
-            ? (baseVideoWeights[platform] / totalBaseVideoWeight) * 100
-            : 0;
-        proportionalStoryWeights[platform] =
-          totalBaseStoryWeight > 0 &&
-          (platform === "instagram" || platform === "facebook")
-            ? (baseStoryWeights[platform] / totalBaseStoryWeight) * 100
-            : 0;
-      });
-    } else {
-      // In advanced mode, use custom weights as-is
-      selectedPlatformKeys.forEach((platform) => {
-        proportionalVideoWeights[platform] = baseVideoWeights[platform];
-        proportionalStoryWeights[platform] = baseStoryWeights[platform];
+        // Distribute video budget proportionally across platforms
+        const platformVideoShare = baseVideoWeights[platform] / totalBaseVideoWeight;
+        normalizedVideoWeights[platform] = (platformVideoShare * totalVideoBudget / price) * 100;
       });
     }
 
-    const totalVideoWeight = Object.values(proportionalVideoWeights).reduce(
-      (sum, weight) => sum + weight,
-      0
-    );
-    const totalStoryWeight = Object.values(proportionalStoryWeights).reduce(
-      (sum, weight) => sum + weight,
-      0
-    );
-    const totalWeight = totalVideoWeight + totalStoryWeight;
+    if (totalBaseStoryWeight > 0 && totalStoryBudget > 0) {
+      selectedPlatformKeys.forEach((platform) => {
+        if (platform === "instagram" || platform === "facebook") {
+          // Distribute story budget proportionally across IG/FB platforms
+          const platformStoryShare = baseStoryWeights[platform] / totalBaseStoryWeight;
+          normalizedStoryWeights[platform] = (platformStoryShare * totalStoryBudget / price) * 100;
+        } else {
+          normalizedStoryWeights[platform] = 0;
+        }
+      });
+    }
 
-    // Calculate price allocation
-    const videoBudget =
-      totalVideoWeight > 0 ? (price * totalVideoWeight) / totalWeight : 0;
-    // Note: Story budget is calculated per platform with fixed 5% each
+    // FIXED: Calculate total content pieces for proper views distribution
+    const totalContentPieces = totalVideos + totalStories;
+    const viewsPerContentPiece = totalContentPieces > 0 ? views / totalContentPieces : 0;
 
     const breakdown = {};
+    let totalAllocatedPrice = 0; // Track allocated price to ensure 100%
+    let totalAllocatedViews = 0; // Track allocated views to ensure 100%
 
     selectedPlatformKeys.forEach((platform) => {
-      const videoWeight = proportionalVideoWeights[platform] || 0;
-      const storyWeight = proportionalStoryWeights[platform] || 0;
+      const videoWeight = normalizedVideoWeights[platform] || 0;
+      const storyWeight = normalizedStoryWeights[platform] || 0;
 
-      // Calculate platform's share of total budget based on proportional weights
-      const platformVideoBudget =
-        totalVideoWeight > 0
-          ? (videoWeight / totalVideoWeight) * videoBudget
-          : 0;
-
-      // For stories: Each platform gets its fixed percentage (5% for IG, 5% for FB)
-      // This percentage is divided by the number of stories to get price per story
-      let platformStoryBudget = 0;
-      let pricePerStory = 0;
-
-      if (
-        storyCount > 0 &&
-        (platform === "instagram" || platform === "facebook")
-      ) {
-        // Each story type gets fixed 5% of total budget
-        const storyPercentage = 5; // 5% for each platform's stories
-        platformStoryBudget = (price * storyPercentage) / 100;
-        pricePerStory = platformStoryBudget / storyCount;
-      }
+      // Calculate platform's budget based on normalized weights
+      const platformVideoBudget = (price * videoWeight) / 100;
+      const platformStoryBudget = (price * storyWeight) / 100;
 
       // Calculate per-unit prices for this platform
-      const pricePerVideo =
-        videoCount > 0 ? platformVideoBudget / videoCount : 0;
+      const pricePerVideo = videoCount > 0 ? platformVideoBudget / videoCount : 0;
+      const pricePerStory = storyCount > 0 && (platform === "instagram" || platform === "facebook") 
+        ? platformStoryBudget / storyCount : 0;
 
       const totalVideoPrice = videoCount > 0 ? pricePerVideo * videoCount : 0;
-      const totalStoryPrice =
-        storyCount > 0 && (platform === "instagram" || platform === "facebook")
-          ? pricePerStory * storyCount
-          : 0;
+      const totalStoryPrice = storyCount > 0 && (platform === "instagram" || platform === "facebook")
+        ? pricePerStory * storyCount : 0;
 
-      // Calculate views distribution per platform, per video, and per story
-      // Videos get their proportional share of views based on video weight
-      const videoViewsShare =
-        totalVideoWeight > 0 ? videoWeight / totalVideoWeight : 0;
-      const videoViews = views * videoViewsShare;
-      const viewsPerVideo = videoCount > 0 ? videoViews / videoCount : 0;
+      totalAllocatedPrice += totalVideoPrice + totalStoryPrice;
 
-      // Stories get their proportional share of views (5% each for IG/FB stories)
-      let storyViews = 0;
-      let viewsPerStory = 0;
-      if (
-        storyCount > 0 &&
-        (platform === "instagram" || platform === "facebook")
-      ) {
-        const storyViewsPercentage = 5; // 5% for each platform's stories
-        storyViews = (views * storyViewsPercentage) / 100;
-        viewsPerStory = storyViews / storyCount;
-      }
+      // FIXED: Calculate views distribution using global video vs story weight
+      const totalVideoViews = (views * globalVideoWeight / 100) * (videoWeight / (globalVideoWeight || 1));
+      const totalStoryViews = (views * globalStoryWeight / 100) * (storyWeight / (globalStoryWeight || 1));
+      
+      const viewsPerVideo = videoCount > 0 ? totalVideoViews / videoCount : 0;
+      const viewsPerStory = storyCount > 0 && (platform === "instagram" || platform === "facebook")
+        ? totalStoryViews / storyCount : 0;
 
-      const platformViews = videoViews + storyViews;
+      const platformViews = totalVideoViews + totalStoryViews;
+      totalAllocatedViews += platformViews;
 
       breakdown[platform] = {
         videoCount: videoCount,
@@ -312,8 +276,8 @@ function App() {
         totalPrice: totalVideoPrice + totalStoryPrice,
         // Views breakdown per platform, per video, and per story
         totalViews: platformViews,
-        videoViews: videoViews,
-        storyViews: storyViews,
+        videoViews: totalVideoViews,
+        storyViews: totalStoryViews,
         viewsPerVideo: viewsPerVideo,
         viewsPerStory:
           platform === "instagram" || platform === "facebook"
@@ -329,6 +293,37 @@ function App() {
             : 0,
       };
     });
+
+    // FIXED: Handle any rounding errors to ensure exact 100% allocation for both price and views
+    const priceRoundingError = price - totalAllocatedPrice;
+    const viewsRoundingError = views - totalAllocatedViews;
+    
+    if ((Math.abs(priceRoundingError) > 0.01 || Math.abs(viewsRoundingError) > 0.01) && selectedPlatformKeys.length > 0) {
+      // Add the rounding errors to the first platform's video metrics
+      const firstPlatform = selectedPlatformKeys[0];
+      
+      // Fix price rounding error
+      if (Math.abs(priceRoundingError) > 0.01) {
+        breakdown[firstPlatform].totalVideoPrice += priceRoundingError;
+        breakdown[firstPlatform].pricePerVideo = videoCount > 0 
+          ? breakdown[firstPlatform].totalVideoPrice / videoCount : 0;
+        breakdown[firstPlatform].totalPrice = breakdown[firstPlatform].totalVideoPrice + breakdown[firstPlatform].totalStoryPrice;
+      }
+      
+      // Fix views rounding error
+      if (Math.abs(viewsRoundingError) > 0.01) {
+        breakdown[firstPlatform].videoViews += viewsRoundingError;
+        breakdown[firstPlatform].viewsPerVideo = videoCount > 0 
+          ? breakdown[firstPlatform].videoViews / videoCount : 0;
+        breakdown[firstPlatform].totalViews = breakdown[firstPlatform].videoViews + breakdown[firstPlatform].storyViews;
+      }
+      
+      // Recalculate price per view metrics for the adjusted platform
+      if (breakdown[firstPlatform].totalViews > 0) {
+        breakdown[firstPlatform].pricePerView = breakdown[firstPlatform].totalPrice / breakdown[firstPlatform].totalViews;
+        breakdown[firstPlatform].pricePerThousandViews = breakdown[firstPlatform].pricePerView * 1000;
+      }
+    }
 
     return {
       breakdown,
@@ -346,7 +341,6 @@ function App() {
     isAdvancedMode,
     customWeights,
     globalVideoWeight,
-    globalStoryWeight,
   ]);
 
   // Copy to clipboard function
@@ -426,12 +420,9 @@ function App() {
       if (profile.customWeights) {
         setCustomWeights(profile.customWeights);
       }
-      if (profile.globalWeights) {
-        setGlobalVideoWeight(profile.globalWeights.video);
-        setGlobalStoryWeight(profile.globalWeights.story);
-      }
+      // Global weights removed in favor of platform-specific weights
     },
-    [setCustomWeights, setGlobalVideoWeight, setGlobalStoryWeight]
+    [setCustomWeights]
   );
 
   const handleSaveProfile = useCallback(() => {
@@ -441,10 +432,7 @@ function App() {
         name: profileName.trim(),
         promocode: promoCode.trim(),
         customWeights: { ...customWeights },
-        globalWeights: {
-          video: globalVideoWeight,
-          story: globalStoryWeight,
-        },
+        // globalWeights removed in favor of platform-specific weights
         isAdvancedMode,
       };
 
@@ -470,8 +458,6 @@ function App() {
     promoCode,
     isAdvancedMode,
     customWeights,
-    globalVideoWeight,
-    globalStoryWeight,
     showCopyFeedback,
   ]);
 
@@ -513,12 +499,7 @@ function App() {
         breakdown: calculations.breakdown,
         isAdvancedMode,
         customWeights: isAdvancedMode ? { ...customWeights } : null,
-        globalWeights: isAdvancedMode
-          ? {
-              video: globalVideoWeight,
-              story: globalStoryWeight,
-            }
-          : null,
+        // globalWeights removed in favor of platform-specific weights
       };
 
       dealHistoryStorage.save(dealEntry);
@@ -543,8 +524,6 @@ function App() {
     selectedPlatforms,
     isAdvancedMode,
     customWeights,
-    globalVideoWeight,
-    globalStoryWeight,
     showCopyFeedback,
     syncDealToGoogleSheets,
   ]);
@@ -685,23 +664,24 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <img
-              src="/logo.svg"
-              alt="Influencer Deal Calculator"
-              className="w-16 h-16 mr-4"
-            />
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-1">
-                Influencer Deal Calculator
-              </h1>
-              <p className="text-purple-200">
-                Calculate fair pricing for influencer partnerships
-              </p>
-            </div>
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <img
+                src="/logo.svg"
+                alt="Influencer Deal Calculator"
+                className="w-16 h-16 mr-4"
+              />
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-1">
+                  Influencer Deal Calculator
+                </h1>
+                <p className="text-purple-200">
+                  Calculate fair pricing for influencer partnerships
+                </p>
+              </div>
           </div>
         </div>
 
@@ -1023,172 +1003,143 @@ function App() {
                   </label>
                 </div>
 
-                {/* Help Section */}
-                <div className="mb-4">
-                  <button
-                    onClick={() => setIsHelpExpanded(!isHelpExpanded)}
-                    className="flex items-center space-x-2 text-purple-200 hover:text-white transition-colors"
-                  >
-                    <span>{isHelpExpanded ? "▼" : "▶"}</span>
-                    <span className="text-sm">How does weighting work?</span>
-                  </button>
-
-                  {isHelpExpanded && (
-                    <div className="mt-3 p-4 bg-white/5 rounded-lg text-sm text-purple-100 space-y-2">
-                      <p>
-                        <strong>Platform Weighting:</strong> Different platforms
-                        have different engagement rates and value. YouTube
-                        videos typically get more engagement than Twitter posts.
-                      </p>
-                      <p>
-                        <strong>Content Type Weighting:</strong> Videos usually
-                        require more effort and get better engagement than
-                        Stories, so they're weighted higher.
-                      </p>
-                      <p>
-                        <strong>How it works:</strong> The total price is
-                        distributed based on these weights. Higher weight =
-                        higher portion of the budget.
-                      </p>
-                      <p>
-                        <strong>Advanced Mode:</strong> Customize weights for
-                        each platform and content type to match your specific
-                        needs.
-                      </p>
+                {/* Simple Explanation */}
+                <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <div className="flex items-start space-x-3">
+                    <div className="text-blue-400 text-lg">💡</div>
+                    <div className="text-sm text-blue-100">
+                      <p className="font-medium mb-2">Advanced Mode: Custom Platform Pricing</p>
+                      <p>Adjust how much budget goes to each platform. Higher percentages = more money for that platform.</p>
+                      <p className="text-xs mt-1 opacity-75">Default: Facebook 50%, Instagram 20%, TikTok 20%, YouTube 5%, Twitter 5%</p>
                     </div>
-                  )}
+                  </div>
                 </div>
 
-                {/* Advanced Weighting Controls */}
+                {/* Global Video vs Story Weight Slider */}
+                {isAdvancedMode && (
+                  <div className="border-t border-white/20 pt-4 mb-4">
+                    <h3 className="text-lg font-medium text-white mb-3">
+                      🎬 Content Type Distribution
+                    </h3>
+                    <p className="text-sm text-purple-200 mb-4">
+                      Control how your budget is split between videos and stories across all platforms.
+                    </p>
+                    
+                    <div className="bg-white/5 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-white font-medium">Videos</span>
+                        <span className="text-white font-medium">Stories</span>
+                      </div>
+                      
+                      <div className="relative mb-3">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={globalVideoWeight}
+                          onChange={(e) => setGlobalVideoWeight(parseInt(e.target.value))}
+                          className="slider-purple"
+                        />
+                        <div className="flex justify-between text-xs text-purple-300 mt-1">
+                          <span>0%</span>
+                          <span>25%</span>
+                          <span>50%</span>
+                          <span>75%</span>
+                          <span>100%</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between text-sm">
+                        <div className="text-center">
+                          <div className="text-white font-medium">{globalVideoWeight}%</div>
+                          <div className="text-purple-300">Videos</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-white font-medium">{100 - globalVideoWeight}%</div>
+                          <div className="text-purple-300">Stories</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Simple Platform Budget Distribution */}
                 {isAdvancedMode && (
                   <div className="space-y-4">
                     <div className="border-t border-white/20 pt-4">
                       <h3 className="text-lg font-medium text-white mb-3">
-                        Global Content Weights
+                        💰 Platform Budget Distribution
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-purple-200 mb-2">
-                            Video Weight: {globalVideoWeight}x
-                          </label>
-                          <input
-                            type="range"
-                            min="1"
-                            max="10"
-                            value={globalVideoWeight}
-                            onChange={(e) =>
-                              setGlobalVideoWeight(parseInt(e.target.value))
-                            }
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-orange"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-purple-200 mb-2">
-                            Story Weight: {globalStoryWeight}x
-                          </label>
-                          <input
-                            type="range"
-                            min="1"
-                            max="10"
-                            value={globalStoryWeight}
-                            onChange={(e) =>
-                              setGlobalStoryWeight(parseInt(e.target.value))
-                            }
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-orange"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                      <p className="text-sm text-purple-200 mb-4">
+                        Adjust what percentage of your total budget goes to each platform. All percentages will automatically adjust to total 100%.
+                      </p>
 
-                    <div className="border-t border-white/20 pt-4">
-                      <h3 className="text-lg font-medium text-white mb-3">
-                        Platform-Specific Weights
-                      </h3>
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 gap-3">
                         {Object.entries({
-                          youtube: {
-                            name: "YouTube",
-                            icon: "/icons/youtube.svg",
-                          },
-                          instagram: {
-                            name: "Instagram",
-                            icon: "/icons/instagram.svg",
-                          },
-                          tiktok: { name: "TikTok", icon: "/icons/tiktok.svg" },
-                          twitter: {
-                            name: "Twitter",
-                            icon: "/icons/twitter.svg",
-                          },
-                          facebook: {
-                            name: "Facebook",
-                            icon: "/icons/facebook.svg",
-                          },
-                        }).map(([platform, info]) => (
-                          <div
-                            key={platform}
-                            className="bg-white/5 rounded-lg p-3"
-                          >
-                            <div className="flex items-center space-x-2 mb-3">
-                              <img
-                                src={info.icon}
-                                alt={info.name}
-                                className="w-5 h-5"
-                              />
-                              <span className="text-white font-medium">
-                                {info.name}
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <label className="block text-xs text-purple-200 mb-1">
-                                  Video Weight:{" "}
-                                  {customWeights[platform]?.video || 1}x
-                                </label>
+                          facebook: { name: "Facebook", icon: "/icons/facebook.svg", defaultPercent: 50 },
+                          instagram: { name: "Instagram", icon: "/icons/instagram.svg", defaultPercent: 20 },
+                          tiktok: { name: "TikTok", icon: "/icons/tiktok.svg", defaultPercent: 20 },
+                          youtube: { name: "YouTube", icon: "/icons/youtube.svg", defaultPercent: 5 },
+                          twitter: { name: "Twitter", icon: "/icons/twitter.svg", defaultPercent: 5 },
+                        }).map(([platform, info]) => {
+                          const currentWeight = customWeights[platform]?.video || DEFAULT_WEIGHTS[platform]?.video || 1;
+                          const totalWeight = Object.keys(selectedPlatforms)
+                            .filter(p => selectedPlatforms[p])
+                            .reduce((sum, p) => sum + (customWeights[p]?.video || DEFAULT_WEIGHTS[p]?.video || 1), 0);
+                          const percentage = totalWeight > 0 ? Math.round((currentWeight / totalWeight) * 100) : 0;
+                          
+                          return (
+                            <div key={platform} className="bg-white/5 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center space-x-3">
+                                  <img src={info.icon} alt={info.name} className="w-6 h-6" />
+                                  <span className="text-white font-medium">{info.name}</span>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-lg font-bold text-purple-300">{percentage}%</div>
+                                  <div className="text-xs text-purple-200">of budget</div>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm text-purple-200">
+                                  <span>Priority</span>
+                                  <span>Low ← → High</span>
+                                </div>
                                 <input
                                   type="range"
                                   min="1"
-                                  max="20"
-                                  value={customWeights[platform]?.video || 1}
-                                  onChange={(e) =>
-                                    setCustomWeights((prev) => ({
+                                  max="10"
+                                  value={currentWeight}
+                                  onChange={(e) => {
+                                    const newWeight = parseInt(e.target.value);
+                                    setCustomWeights(prev => ({
                                       ...prev,
                                       [platform]: {
                                         ...prev[platform],
-                                        video: parseInt(e.target.value),
-                                      },
-                                    }))
-                                  }
-                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-orange"
+                                        video: newWeight,
+                                        story: newWeight // Keep story weight same as video for simplicity
+                                      }
+                                    }));
+                                  }}
+                                  className="slider-purple"
                                 />
-                              </div>
-                              {(platform === "instagram" ||
-                                platform === "facebook") && (
-                                <div>
-                                  <label className="block text-xs text-purple-200 mb-1">
-                                    Story Weight:{" "}
-                                    {customWeights[platform]?.story || 1}x
-                                  </label>
-                                  <input
-                                    type="range"
-                                    min="1"
-                                    max="10"
-                                    value={customWeights[platform]?.story || 1}
-                                    onChange={(e) =>
-                                      setCustomWeights((prev) => ({
-                                        ...prev,
-                                        [platform]: {
-                                          ...prev[platform],
-                                          story: parseInt(e.target.value),
-                                        },
-                                      }))
-                                    }
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider-orange"
-                                  />
+                                <div className="flex justify-between text-xs text-purple-300">
+                                  <span>1</span>
+                                  <span className="font-medium">Weight: {currentWeight}</span>
+                                  <span>10</span>
                                 </div>
-                              )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
+                      </div>
+                      
+                      <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                        <div className="flex items-center space-x-2 text-green-300 text-sm">
+                          <span>✓</span>
+                          <span>Total budget distribution: 100% (automatically balanced)</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1683,8 +1634,7 @@ function App() {
                               setCustomWeights(deal.customWeights);
                             }
                             if (deal.globalWeights) {
-                              setGlobalVideoWeight(deal.globalWeights.video);
-                              setGlobalStoryWeight(deal.globalWeights.story);
+                              // Global weights removed
                             }
 
                             // Show feedback that deal was loaded
@@ -1788,7 +1738,8 @@ function App() {
         </div>
         </footer>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

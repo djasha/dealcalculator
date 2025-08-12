@@ -1,42 +1,68 @@
-/* Custom slider styles for Advanced Mode */
+/* Custom slider styles for Advanced Mode - FIXED for smooth dragging */
+.slider-orange {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #374151;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
 .slider-orange::-webkit-slider-thumb {
+  -webkit-appearance: none;
   appearance: none;
   height: 20px;
   width: 20px;
   border-radius: 50%;
   background: #ea580c;
-  cursor: pointer;
+  cursor: grab;
   border: 2px solid #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.slider-orange::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
 }
 
 .slider-orange::-webkit-slider-thumb:hover {
   background: #dc2626;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .slider-orange::-webkit-slider-track {
   height: 8px;
-  cursor: pointer;
   background: #374151;
   border-radius: 4px;
+  border: none;
 }
 
 .slider-orange::-moz-range-thumb {
-  height: 20px;
-  width: 20px;
+  height: 18px;
+  width: 18px;
   border-radius: 50%;
   background: #ea580c;
-  cursor: pointer;
+  cursor: grab;
   border: 2px solid #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  -moz-appearance: none;
+  transition: all 0.2s ease;
+}
+
+.slider-orange::-moz-range-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
 }
 
 .slider-orange::-moz-range-track {
   height: 8px;
-  cursor: pointer;
   background: #374151;
   border-radius: 4px;
+  border: none;
 }
 
 .slider-orange:focus {
@@ -45,4 +71,124 @@
 
 .slider-orange:focus::-webkit-slider-thumb {
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.3);
+}
+
+/* Purple slider styles for Advanced Mode - FIXED for smooth dragging */
+.slider-purple {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(to right, #e9d5ff, #8b5cf6);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.slider-purple::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  cursor: grab;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.slider-purple::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+  background: #7c3aed;
+}
+
+.slider-purple::-webkit-slider-thumb:hover {
+  background: #7c3aed;
+  transform: scale(1.05);
+}
+
+.slider-purple::-webkit-slider-track {
+  height: 8px;
+  background: linear-gradient(to right, #e9d5ff, #8b5cf6);
+  border-radius: 4px;
+  border: none;
+}
+
+.slider-purple::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  cursor: grab;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  -moz-appearance: none;
+  transition: all 0.2s ease;
+}
+
+.slider-purple::-moz-range-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.1);
+  background: #7c3aed;
+}
+
+.slider-purple::-moz-range-thumb:hover {
+  background: #7c3aed;
+  transform: scale(1.05);
+}
+
+.slider-purple::-moz-range-track {
+  height: 8px;
+  background: linear-gradient(to right, #e9d5ff, #8b5cf6);
+  border-radius: 4px;
+  border: none;
+}
+
+.slider-purple:focus {
+  outline: none;
+}
+
+.slider-purple:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+}
+
+/* Additional cross-browser fixes for smooth dragging */
+.slider-purple::-ms-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  cursor: grab;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider-purple::-ms-track {
+  height: 8px;
+  background: linear-gradient(to right, #e9d5ff, #8b5cf6);
+  border-radius: 4px;
+  border: none;
+}
+
+.slider-orange::-ms-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #ea580c;
+  cursor: grab;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider-orange::-ms-track {
+  height: 8px;
+  background: #374151;
+  border-radius: 4px;
+  border: none;
 }
