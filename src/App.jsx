@@ -205,7 +205,7 @@ function App() {
       selectedPlatformKeys.forEach((platform) => {
         // Distribute video budget proportionally across platforms
         const platformVideoShare = baseVideoWeights[platform] / totalBaseVideoWeight;
-        normalizedVideoWeights[platform] = (platformVideoShare * totalVideoBudget / price) * 100;
+        normalizedVideoWeights[platform] = platformVideoShare * (globalVideoWeight);
       });
     }
 
@@ -214,7 +214,7 @@ function App() {
         if (platform === "instagram" || platform === "facebook") {
           // Distribute story budget proportionally across IG/FB platforms
           const platformStoryShare = baseStoryWeights[platform] / totalBaseStoryWeight;
-          normalizedStoryWeights[platform] = (platformStoryShare * totalStoryBudget / price) * 100;
+          normalizedStoryWeights[platform] = platformStoryShare * (100 - globalVideoWeight);
         } else {
           normalizedStoryWeights[platform] = 0;
         }
@@ -248,9 +248,10 @@ function App() {
 
       totalAllocatedPrice += totalVideoPrice + totalStoryPrice;
 
-      // FIXED: Calculate views distribution using global video vs story weight
-      const totalVideoViews = (views * globalVideoWeight / 100) * (videoWeight / (globalVideoWeight || 1));
-      const totalStoryViews = (views * globalStoryWeight / 100) * (storyWeight / (globalStoryWeight || 1));
+      // FIXED: Calculate views distribution using normalized platform weights
+      const totalVideoViews = videoCount > 0 ? (views * videoWeight / 100) : 0;
+      const totalStoryViews = (storyCount > 0 && (platform === "instagram" || platform === "facebook")) 
+        ? (views * storyWeight / 100) : 0;
       
       const viewsPerVideo = videoCount > 0 ? totalVideoViews / videoCount : 0;
       const viewsPerStory = storyCount > 0 && (platform === "instagram" || platform === "facebook")

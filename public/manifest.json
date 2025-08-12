@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Influencer Deal Calculator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Calculate fair pricing for influencer partnerships with advanced weighting and profile management",
   "permissions": [
     "sidePanel",
