@@ -39,8 +39,14 @@ function App() {
   const [videoCount, setVideoCount] = useState(0);
   const [storyCount, setStoryCount] = useState(0);
 
-  // Advanced Mode: Custom Weights
-  const [customWeights, setCustomWeights] = useState(DEFAULT_WEIGHTS);
+  // Advanced Mode: Custom Weights - Start with equal weights (5 for all platforms)
+  const [customWeights, setCustomWeights] = useState({
+    youtube: { video: 5, story: 0 },
+    instagram: { video: 5, story: 5 },
+    tiktok: { video: 5, story: 0 },
+    twitter: { video: 5, story: 0 },
+    facebook: { video: 5, story: 5 },
+  });
   
   // Global Content Weight: Controls video vs story distribution (0-100, where 100 = all videos, 0 = all stories)
   const [globalVideoWeight, setGlobalVideoWeight] = useState(80); // Default: 80% videos, 20% stories
