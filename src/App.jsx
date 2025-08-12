@@ -196,35 +196,41 @@ function App() {
       .filter((p) => p === "instagram" || p === "facebook")
       .reduce((sum, platform) => sum + baseStoryWeights[platform], 0);
 
-    // FIXED: Apply global video vs story weight distribution
-    const globalStoryWeight = 100 - globalVideoWeight;
-    
-    // Calculate total budget allocation for videos and stories
-    const totalVideoBudget = (globalVideoWeight / 100) * price;
-    const totalStoryBudget = (globalStoryWeight / 100) * price;
-    
-    // Calculate normalized platform weights within video and story budgets
+    // FIXED: Proper calculation logic for platform distribution
     const normalizedVideoWeights = {};
     const normalizedStoryWeights = {};
 
-    if (totalBaseVideoWeight > 0 && totalVideoBudget > 0) {
+    // If no stories exist, ignore global video/story weight and distribute 100% to videos
+    if (totalStories === 0) {
+      // Distribute 100% of budget across video platforms based on their weights
       selectedPlatformKeys.forEach((platform) => {
-        // Distribute video budget proportionally across platforms
         const platformVideoShare = baseVideoWeights[platform] / totalBaseVideoWeight;
-        normalizedVideoWeights[platform] = platformVideoShare * (globalVideoWeight);
+        normalizedVideoWeights[platform] = platformVideoShare * 100; // 100% to videos
+        normalizedStoryWeights[platform] = 0;
       });
-    }
+    } else {
+      // Stories exist, apply global video vs story weight distribution
+      const globalStoryWeight = 100 - globalVideoWeight;
+      
+      // Distribute video portion of budget
+      if (totalBaseVideoWeight > 0) {
+        selectedPlatformKeys.forEach((platform) => {
+          const platformVideoShare = baseVideoWeights[platform] / totalBaseVideoWeight;
+          normalizedVideoWeights[platform] = platformVideoShare * globalVideoWeight;
+        });
+      }
 
-    if (totalBaseStoryWeight > 0 && totalStoryBudget > 0) {
-      selectedPlatformKeys.forEach((platform) => {
-        if (platform === "instagram" || platform === "facebook") {
-          // Distribute story budget proportionally across IG/FB platforms
-          const platformStoryShare = baseStoryWeights[platform] / totalBaseStoryWeight;
-          normalizedStoryWeights[platform] = platformStoryShare * (100 - globalVideoWeight);
-        } else {
-          normalizedStoryWeights[platform] = 0;
-        }
-      });
+      // Distribute story portion of budget (only to Instagram and Facebook)
+      if (totalBaseStoryWeight > 0) {
+        selectedPlatformKeys.forEach((platform) => {
+          if (platform === "instagram" || platform === "facebook") {
+            const platformStoryShare = baseStoryWeights[platform] / totalBaseStoryWeight;
+            normalizedStoryWeights[platform] = platformStoryShare * globalStoryWeight;
+          } else {
+            normalizedStoryWeights[platform] = 0;
+          }
+        });
+      }
     }
 
     // FIXED: Calculate total content pieces for proper views distribution
