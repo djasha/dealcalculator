@@ -1038,7 +1038,16 @@ function App() {
                           max="100"
                           value={globalVideoWeight}
                           onChange={(e) => setGlobalVideoWeight(parseInt(e.target.value))}
+                          onInput={(e) => setGlobalVideoWeight(parseInt(e.target.value))}
                           className="slider-purple"
+                          style={{ 
+                            WebkitAppearance: 'none',
+                            appearance: 'none',
+                            background: 'linear-gradient(to right, #e9d5ff, #8b5cf6)',
+                            height: '8px',
+                            borderRadius: '4px',
+                            outline: 'none'
+                          }}
                         />
                         <div className="flex justify-between text-xs text-purple-300 mt-1">
                           <span>0%</span>
@@ -1122,7 +1131,26 @@ function App() {
                                       }
                                     }));
                                   }}
+                                  onInput={(e) => {
+                                    const newWeight = parseInt(e.target.value);
+                                    setCustomWeights(prev => ({
+                                      ...prev,
+                                      [platform]: {
+                                        ...prev[platform],
+                                        video: newWeight,
+                                        story: newWeight // Keep story weight same as video for simplicity
+                                      }
+                                    }));
+                                  }}
                                   className="slider-purple"
+                                  style={{ 
+                                    WebkitAppearance: 'none',
+                                    appearance: 'none',
+                                    background: 'linear-gradient(to right, #e9d5ff, #8b5cf6)',
+                                    height: '8px',
+                                    borderRadius: '4px',
+                                    outline: 'none'
+                                  }}
                                 />
                                 <div className="flex justify-between text-xs text-purple-300">
                                   <span>1</span>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Test</title>
+    <link rel="stylesheet" href="src/slider.css">
+    <style>
+        body {
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 50px;
+        }
+        .test-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .slider-container {
+            margin: 30px 0;
+        }
+        .slider-label {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .value-display {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #8b5cf6;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Slider Drag Test</h1>
+        <p>Test if sliders can be dragged properly:</p>
+        
+        <div class="slider-container">
+            <div class="slider-label">Purple Slider Test:</div>
+            <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value="50" 
+                class="slider-purple"
+                id="purpleSlider"
+            />
+            <div class="value-display" id="purpleValue">Value: 50</div>
+        </div>
+        
+        <div class="slider-container">
+            <div class="slider-label">Orange Slider Test:</div>
+            <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value="30" 
+                class="slider-orange"
+                id="orangeSlider"
+            />
+            <div class="value-display" id="orangeValue">Value: 30</div>
+        </div>
+        
+        <div class="slider-container">
+            <div class="slider-label">Default Browser Slider (for comparison):</div>
+            <input 
+                type="range" 
+                min="0" 
+                max="100" 
+                value="70" 
+                id="defaultSlider"
+                style="width: 100%;"
+            />
+            <div class="value-display" id="defaultValue">Value: 70</div>
+        </div>
+    </div>
+
+    <script>
+        // Add event listeners to update values
+        document.getElementById('purpleSlider').addEventListener('input', function(e) {
+            document.getElementById('purpleValue').textContent = 'Value: ' + e.target.value;
+        });
+        
+        document.getElementById('orangeSlider').addEventListener('input', function(e) {
+            document.getElementById('orangeValue').textContent = 'Value: ' + e.target.value;
+        });
+        
+        document.getElementById('defaultSlider').addEventListener('input', function(e) {
+            document.getElementById('defaultValue').textContent = 'Value: ' + e.target.value;
+        });
+        
+        // Test drag functionality
+        console.log('Slider test loaded. Try dragging the sliders above.');
+    </script>
+</body>
+</html>
