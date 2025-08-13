@@ -107,22 +107,12 @@ function App() {
 
   // Helper function for formatting large numbers
   const formatLargeNumber = useCallback((num) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + "M";
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "k";
-    }
     return Math.round(num).toLocaleString();
   }, []);
 
   const formatViewsDisplay = useCallback((value) => {
     const num = parseFloat(value);
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(num % 1000000 === 0 ? 0 : 1)}m`;
-    } else if (num >= 1000) {
-      return `${(num / 1000).toFixed(num % 1000 === 0 ? 0 : 1)}k`;
-    }
-    return value;
+    return Math.round(num).toLocaleString();
   }, []);
 
   // Load profiles and deal history on component mount
